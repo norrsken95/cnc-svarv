@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programinställningsblad – 200-01 (Axel 01)</title>
+<style>
+  @page { size: A4 landscape; margin: 10mm; }
+  :root {
+    --bg: #e9ecef;
+    --sheet: #ffffff;
+    --text: #111111;
+    --line: #6f6f6f;
+    --band: #d9d9d9;
+    --head: #f2f2f2;
+    --title: #2f7aa8;
+    --muted: #6b6b6b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14181b;
+      --sheet: #1c2125;
+      --text: #e6e9eb;
+      --line: #7d878e;
+      --band: #2b3238;
+      --head: #232a30;
+      --title: #7fb2e0;
+      --muted: #9aa5ad;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 1.5rem 1rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .sheet {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--sheet);
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid var(--line); padding: 5px 8px; vertical-align: middle; }
+  .top td { height: 30px; }
+  .top .logo { width: 22%; height: 78px; color: var(--muted); text-align: center; font-size: 12px; }
+  .top .title { text-align: center; color: var(--title); font-size: 18px; font-weight: 400; }
+  .lbl { font-weight: 700; }
+  .val { text-align: center; font-weight: 700; }
+  .band { height: 14px; background: var(--band); padding: 0; }
+  .ops { margin-top: 0; }
+  .ops thead th { background: var(--head); font-weight: 700; text-align: center; }
+  .ops td { text-align: center; }
+  .ops td.l { text-align: left; }
+  .ops .rem { text-align: left; width: 20%; font-size: 12px; }
+  .total td { border: 1px solid var(--line); }
+  .total .gap { border: none; }
+  .total .tl { text-align: right; font-weight: 700; }
+  .total .tv { text-align: center; font-weight: 700; }
+  .note { margin-top: 1.6rem; }
+  .note td { height: 90px; vertical-align: top; }
+  .note .nh { font-weight: 700; }
+  .note p { margin: .25rem 0 0; }
+  .sign { margin-top: 0; }
+  .sign th { background: var(--band); text-align: center; font-weight: 700; width: 50%; }
+  .sign td { height: 34px; }
+  .page { text-align: right; font-size: 11px; margin-top: .4rem; color: var(--muted); }
+  @media print {
+    body { background: #fff; color: #000; padding: 0; }
+    .sheet { padding: 0; max-width: none; background: #fff; }
+    :root { --line: #6f6f6f; --band: #d9d9d9; --head: #f2f2f2; --title: #2f7aa8; --muted: #6b6b6b; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <table class="top">
+    <tr>
+      <td class="logo" rowspan="2" colspan="2">Logotyp</td>
+      <td class="title" rowspan="2" colspan="2">PROGRAMINSTÄLLNINGSBLAD – SVARV</td>
+      <td class="lbl" colspan="2">ARBETSSTYCKE STORLEK</td>
+      <td class="val" colspan="2">OD 50 × L 81 mm, Z 1,0</td>
+    </tr>
+    <tr>
+      <td class="lbl" colspan="2">OPERATION NR</td>
+      <td class="val" colspan="2">OP10 (program 200-01.NC)</td>
+    </tr>
+    <tr>
+      <td class="lbl">MASKIN</td>
+      <td class="val" colspan="3">HAAS ST-10 Svarv</td>
+      <td class="lbl">MATERIAL</td>
+      <td class="val" colspan="1">SS 1914 (11SMnPb30+C)</td>
+      <td class="lbl">PROGRAMMERARE</td>
+      <td class="val">Ihor Posunko</td>
+    </tr>
+    <tr>
+      <td class="lbl">PROJEKTNAMN</td>
+      <td class="val" colspan="3">Axel 01</td>
+      <td class="lbl">RITNINGSNR</td>
+      <td class="val">200-01</td>
+      <td class="lbl">SKIFT / OPERATÖR</td>
+      <td class="val"></td>
+    </tr>
+    <tr><td class="band" colspan="8"></td></tr>
+  </table>
+
+  <table class="ops">
+    <thead>
+      <tr>
+        <th rowspan="2">Op nr</th>
+        <th rowspan="2">Operation</th>
+        <th rowspan="2">Verktygs-<br>specifikation</th>
+        <th rowspan="2">Vkt<br>nr</th>
+        <th colspan="3">Verktygsgeometri</th>
+        <th rowspan="2">Hållare</th>
+        <th rowspan="2">Skärhastighet<br>vc (m/min)</th>
+        <th rowspan="2">Matning<br>fn (mm/varv)</th>
+        <th rowspan="2">Skärdjup<br>ap (mm)</th>
+        <th rowspan="2">Tid<br>h:mm:ss</th>
+        <th rowspan="2">Anmärkningar</th>
+      </tr>
+      <tr>
+        <th>CR</th>
+        <th>Bredd</th>
+        <th>OH</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td class="l">PLANSVARVNING</td>
+        <td>DNMG150604 PF-4425</td>
+        <td>T2</td>
+        <td>0,4</td>
+        <td>20,0</td>
+        <td>125,8</td>
+        <td>DDJNR 2020K 15</td>
+        <td>200</td>
+        <td>0,15</td>
+        <td>1,0</td>
+        <td>0:00:05</td>
+        <td class="rem">Kompensation vänster.</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td class="l">GROVSVARVNING</td>
+        <td>DNMG150604 PF-4425</td>
+        <td>T2</td>
+        <td>0,4</td>
+        <td>20,0</td>
+        <td>125,8</td>
+        <td>DDJNR 2020K 15</td>
+        <td>250</td>
+        <td>0,20</td>
+        <td>1,48</td>
+        <td>0:00:57</td>
+        <td class="rem">Tillägg 0,2 mm.</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td class="l">FINSVARVNING</td>
+        <td>VBMT 160404-PF 4425</td>
+        <td>T3</td>
+        <td>0,4</td>
+        <td>20,0</td>
+        <td>127,2</td>
+        <td>SVJBR 2020K 16</td>
+        <td>300</td>
+        <td>0,035</td>
+        <td>0,2</td>
+        <td>0:00:28</td>
+        <td class="rem">Slitagekompensation höger (G42).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="total">
+    <tr>
+      <td class="gap" style="width:62%"></td>
+      <td class="tl" style="width:24%">Total tid h : min : sek</td>
+      <td class="tv">0:01:30</td>
+    </tr>
+  </table>
+
+  <table class="note">
+    <tr>
+      <td class="nh">Notering:
+      </td>
+    </tr>
+  </table>
+
+  <table class="sign">
+    <tr><th>UPPRÄTTAD AV</th><th>GODKÄND AV</th></tr>
+    <tr><td></td><td></td></tr>
+  </table>
+</div>
+</body>
+</html>

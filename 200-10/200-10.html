@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>200-10</title>
+  <style>
+    :root {
+      --bg: #f5f6f7; --surface: #ffffff; --text: #1d2327;
+      --muted: #5b6770; --line: #d5dade; --accent: #1f4e79; --head-bg: #e6edf3;
+      --sheet: #ffffff; --band: #d9d9d9; --head: #f2f2f2; --title: #2f7aa8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14181b; --surface: #1c2125; --text: #e6e9eb;
+        --muted: #9aa5ad; --line: #333b41; --accent: #7fb2e0; --head-bg: #232a30;
+        --sheet: #1c2125; --band: #2b3238; --head: #232a30; --title: #7fb2e0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 2rem 1rem; background: var(--bg); color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.55; }
+    h1 { margin: 0 0 1rem; font-size: 1.7rem; color: var(--accent); }
+    .viewers { display: flex; gap: 1rem; align-items: stretch; flex-wrap: wrap; margin-bottom: 2rem; }
+    .viewers iframe { flex: 1 1 45%; min-width: 280px; height: 75vh; border: none; }
+    .layout { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; width: 100%; margin-bottom: 2rem; }
+    main { background: var(--surface); border: 1px solid var(--line);
+      border-radius: 6px; padding: 2rem; flex: 1 1 420px; min-width: 280px; }
+    .intro { margin: 0 0 1.5rem; color: var(--muted); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; vertical-align: top; padding: .7rem .9rem; border: 1px solid var(--line); }
+    thead th { background: var(--head-bg); }
+    tbody th { font-weight: 600; width: 38%; }
+    footer { margin-top: 1.25rem; font-size: .9rem; color: var(--muted); }
+    .sheet { width: 100%; max-width: none; margin: 0; border: 1px solid var(--line);
+      border-radius: 6px; background: var(--sheet); padding: 1rem; overflow-x: auto; }
+    .top td { height: 30px; }
+    .top .logo { width: 22%; height: 78px; color: var(--muted); text-align: center; font-size: 12px; }
+    .top .logo img { max-height: 60px; max-width: 100%; width: auto; display: inline-block; }
+    .top .title { text-align: center; color: var(--title); font-size: 18px; font-weight: 400; }
+    .top .title img { width: 100%; height: 60px; object-fit: contain; display: block; }
+    .lbl { font-weight: 700; }
+    .val { text-align: center; font-weight: 700; }
+    .band { height: 14px; background: var(--band); padding: 0; }
+    .ops { margin-top: 0; }
+    .ops thead th { background: var(--head); font-weight: 700; text-align: center; }
+    .ops td { text-align: center;  white-space: nowrap;}
+    .ops td.l { text-align: left; }
+    .ops .rem { text-align: left; width: 20%; font-size: 12px; }
+    .total td { border: 1px solid var(--line); }
+    .total .gap { border: none; }
+    .total .tl { text-align: right; font-weight: 700; }
+    .total .tv { text-align: center; font-weight: 700; }
+    .note { margin-top: 1.6rem; }
+    .note td { height: 90px; vertical-align: top; }
+    .note .nh { font-weight: 700; }
+    .sign { margin-top: 0; }
+    .sign th { background: var(--band); text-align: center; font-weight: 700; width: 50%; }
+    .sign td { height: 34px; }
+    @media print {
+      body { background: #fff; color: #000; padding: 0; }
+      .sheet { padding: 0; max-width: none; background: #fff; }
+    }
+    .code-row { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; margin-top: 2.5rem; margin-bottom: 2rem; }
+    .code-block { background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+      padding: 2rem; flex: 2 1 400px; min-width: 280px; }
+    .code-block h2 { margin: 0 0 1rem; font-size: 1.2rem; color: var(--accent); }
+    pre { margin: 0; overflow-x: auto; font-family: "Consolas", "Courier New", monospace;
+      font-size: .85rem; line-height: 1.6; color: var(--text); white-space: pre; }
+    /* CNC controller-screen look for the NC code */
+    .cnc {
+      max-width: 620px; border: 3px solid #0d2b5e; border-radius: 12px;
+      background: #66b2ff; overflow: hidden;
+      font-family: "Consolas", "Lucida Console", "Courier New", monospace;
+    }
+    .cnc-head {
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+      background: #0d2b5e; color: #fff; font-weight: 700; font-size: .85rem;
+      letter-spacing: .04em; padding: .3rem .8rem;
+    }
+    .cnc-head span:last-child { justify-self: end; }
+    .cnc-body {
+      margin: 0; padding: .6rem .8rem .9rem; max-height: 34rem; overflow: auto;
+      color: #000; font-weight: 700; font-size: .95rem; line-height: 1.4;
+      scrollbar-color: #0d2b5e #66b2ff;
+    }
+    .cnc-body .ln::after { content: " ;"; }
+    .cnc-body .ln.cur { background: #000; color: #fff; }
+
+    /* Code and checklist: equal width and equal height */
+    .code-row { align-items: stretch; }
+    .code-block, .checklist-block { flex: 1 1 360px; min-width: 280px; }
+    .code-block { display: flex; flex-direction: column; }
+    .cnc { flex: 1 1 auto; display: flex; flex-direction: column; max-width: none; min-height: 0; }
+    .cnc-body { flex: 1 1 0; min-height: 22rem; max-height: none; }
+
+    /* Space above code + checklist row */
+    .code-row { margin-top: 2.5rem; }
+    .checklist-block { background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+      padding: 2rem; flex: 1 1 280px; min-width: 260px; }
+    .checklist-block h2 { margin: 0 0 1rem; font-size: 1.2rem; color: var(--accent); }
+    ol.checks { margin: 0; padding: 0; list-style: none; counter-reset: chk; }
+    ol.checks li { display: flex; align-items: flex-start; gap: .6rem; padding: .45rem 0;
+      border-bottom: 1px solid var(--line); counter-increment: chk; }
+    ol.checks li:last-child { border-bottom: none; }
+    ol.checks li::before { content: counter(chk); min-width: 1.4rem; font-size: .8rem;
+      color: var(--muted); padding-top: .15rem; flex-shrink: 0; }
+    ol.checks label { display: flex; align-items: flex-start; gap: .5rem; cursor: pointer; flex: 1; }
+    ol.checks input[type="checkbox"] { width: 1rem; height: 1rem; margin-top: .2rem;
+      flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+    ol.checks span { font-size: .9rem; line-height: 1.4; }
+    ol.checks input[type="checkbox"]:checked + span { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--muted); }
+  
+    /* Slutkontrollrapport from rapport folder */
+    .inspection-block {
+      --insp-paper: #fff; --insp-ink: #111; --insp-muted: #555; --insp-line: #999;
+      --insp-head: #231f20; --insp-label: #8c8c8c; --insp-field: #d4d4d4; --insp-cell: #ebebeb;
+      margin-top: 2rem; color: var(--insp-ink); font-family: Helvetica, Arial, sans-serif; font-size: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      .inspection-block {
+        --insp-paper: #222; --insp-ink: #eee; --insp-muted: #aaa; --insp-line: #666;
+        --insp-head: #0c0c0c; --insp-label: #555; --insp-field: #3a3a3a; --insp-cell: #2e2e2e;
+      }
+    }
+    .inspection-block .sheet { max-width: none; margin: 0; background: var(--insp-paper); box-shadow: 0 1px 6px rgba(0,0,0,.2); border-radius: 6px; overflow: hidden; }
+    .inspection-block header { background: var(--insp-head); color: #fff; padding: 22px 28px; }
+    .inspection-block header h1 { margin: 0; font-size: clamp(20px,4vw,30px); font-style: italic; font-weight: 800; letter-spacing: .5px; color: #fff; }
+    .inspection-block .fields { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+    .inspection-block .lbl { background: var(--insp-label); color: #fff; font-weight: 700; font-size: 12px; text-align: center; padding: 5px; border-left: 2px solid var(--insp-paper); width: auto; }
+    .inspection-block .val { background: var(--insp-field); min-height: 30px; text-align: center; padding: 6px; border-left: 2px solid var(--insp-paper); font-size: 13px; }
+    .inspection-block .tol { display: flex; flex-wrap: wrap; margin: 14px 20px; border: 1px solid var(--insp-head); font-size: 12px; }
+    .inspection-block .tol b { background: var(--insp-head); color: #fff; padding: 6px 12px; font-style: italic; white-space: nowrap; }
+    .inspection-block .tol span { padding: 6px 12px; }
+    .inspection-block .scroll { overflow-x: auto; padding: 0 20px; }
+    .inspection-block table { border-collapse: collapse; width: 100%; min-width: 880px; }
+    .inspection-block th, .inspection-block td { border: 1px solid var(--insp-line); padding: 0 8px; height: 34px; text-align: center; font-size: 13px; vertical-align: middle; }
+    .inspection-block thead th { background: var(--insp-cell); font-size: 11px; height: 30px; }
+    .inspection-block thead th.insp { background: var(--insp-head); color: #fff; }
+    .inspection-block tr.hint td { border: 0; height: 20px; font-size: 10px; font-style: italic; color: var(--insp-muted); }
+    .inspection-block td.ins { background: var(--insp-cell); }
+    .inspection-block td.nr { width: 70px; }
+    .inspection-block td.req { text-align: left; min-width: 250px; }
+    .inspection-block td.notes { text-align: left; vertical-align: top; height: 90px; padding: 8px 10px; line-height: 1.5; }
+    .inspection-block td.notes strong { display: block; font-size: 12px; letter-spacing: .4px; }
+    .inspection-block .rule { border-top: 3px solid var(--insp-head); margin: 26px 20px 0; }
+    .inspection-block .cert { font-style: italic; font-size: 13px; margin: 12px 20px 0; }
+    .inspection-block .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding: 36px 20px 28px; margin-top: 0; }
+    .inspection-block .sign div { display: grid; grid-template-columns: 1fr 110px; gap: 16px; }
+    .inspection-block .sign span { border-top: 1px solid var(--insp-ink); padding-top: 4px; font-size: 11px; }
+    .inspection-block .sign th, .inspection-block .sign td { border: none; height: auto; }
+    @media (max-width: 700px) {
+      .inspection-block .fields { grid-template-columns: 1fr; }
+      .inspection-block .sign { grid-template-columns: 1fr; gap: 28px; }
+    }
+    /* Breadcrumb: home + incremental 200-** */
+    .crumb {
+      display: flex; align-items: center; gap: .45rem; flex-wrap: wrap;
+      margin: 0 0 1.1rem; font-size: .95rem; color: var(--muted);
+    }
+    .crumb a.crumb-home {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 2rem; height: 2rem; color: var(--accent); text-decoration: none;
+      border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
+    }
+    .crumb a.crumb-home:hover { background: var(--head-bg); }
+    .crumb a.crumb-home svg { width: 1.15rem; height: 1.15rem; display: block; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .crumb .crumb-sep { color: var(--muted); font-weight: 500; user-select: none; }
+    .crumb a.crumb-item { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .crumb a.crumb-item:hover { text-decoration: underline; }
+    .crumb .crumb-current { color: var(--text); font-weight: 700; }
+    @media print { .crumb { display: none; } }</style>
+</head>
+<body>
+      <!-- CRUMB -->
+  <nav class="crumb" aria-label="Nav">
+    <a class="crumb-home" href="../index.html" title="Hem" aria-label="Hem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-7h5v7"/></svg></a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-01/200-01.html">200-01</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-02/200-02.html">200-02</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-03/200-03.html">200-03</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-04/200-04.html">200-04</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-05/200-05.html">200-05</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-06/200-06.html">200-06</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-07/200-07.html">200-07</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-08/200-08.html">200-08</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-09/200-09.html">200-09</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <span class="crumb-current" aria-current="page">200-10</span>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-11/200-11.html">200-11</a>
+  </nav>
+  <!-- /CRUMB -->
+
+  <h1>200-10</h1>
+  <div class="viewers">
+    <iframe src="200-10 Drawing.pdf" title="200-10 Drawing"></iframe>
+    <iframe src="https://yaelev74.autodesk360.com/shares/public/SH90d2dQT28d5b602811d96b4563b2206d41?mode=embed" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+  </div>
+  <div class="layout">
+    <main>
+      <h1>Uppspänning</h1>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Uppspänning</th><th scope="col"></th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Chuck</th><td>Hydrauliskt 3-backschuck (självcentrerande), Ø 160 mm</td></tr>
+            <tr><th scope="row">Backar</th><td>Mjuka backar</td></tr>
+            <tr><th scope="row">Spänndiameter</th><td>Ø50 mm (obearbetad råstång)</td></tr>
+            <tr><th scope="row">Utstick</th><td>Ca 45 mm från backarnas framkant</td></tr>
+            <tr><th scope="row">Spännkraft / tryck</th><td>17–28 bar</td></tr>
+            <tr><th scope="row">Arbetskoordinat</th><td>G54</td></tr>
+            <tr><th scope="row">Nollpunkt</th><td>X0 i centrumlinjen, Z0 på den planade framsidan</td></tr>
+            <tr><th scope="row">Startposition</th><td>X54, Z2 före plansvarvning. Verktygsbyte vid G53 X0, G53 Z0.</td></tr>
+            <tr><th scope="row">Kylmedel</th><td>Vattenblandbar emulsion, 6–8 %</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+    <main>
+      <h1>Materialval – SS 1914 (11SMnPb30+C)</h1>
+      <p class="intro">Blylegerat friskärande automatstål, standardiserat enligt SS-EN 10277-3. Ej ett seghärdningsstål – hållfasthet och hårdhet uppnås via kalldragning, ej genom härdning och anlöpning.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Egenskap</th><th>Värde (11SMnPb30+C, SS 1914)</th></tr></thead>
+          <tbody>
+            <tr><th>Materialgrupp</th><td>4 (automatstål, fri-skärande, blylegerat)</td></tr>
+            <tr><th>Kemisk sammansättning (ca)</th><td>C &lt; 0,14 %, Si &lt; 0,05 %, Mn 0,90–1,30 %, P max 0,11 %, S 0,270–0,330 %, Pb 0,20–0,35 %</td></tr>
+            <tr><th>Leveranstillstånd</th><td>Kalldraget (+C)</td></tr>
+            <tr><th>Sträckgräns Re min</th><td>245–440 MPa</td></tr>
+            <tr><th>Brottgräns Rm (kalldraget)</th><td>360–810 MPa</td></tr>
+            <tr><th>Brottförlängning A5 min</th><td>6–9 %</td></tr>
+            <tr><th>Hårdhet (kalldraget)</th><td>ca 140–220 HB</td></tr>
+            <tr><th>Härdning (vid behov)</th><td>Lämpar sig för induktions- eller flamhärdning; ythårdhet ca 52–60 HRC. Ej lämpligt för svetsning utan förvärmning.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer>Källa: Verkstadshandboken.</footer>
+    </main>
+  </div>
+  <div class="sheet">
+
+  <table class="top">
+    <tr>
+      <td class="logo" rowspan="2" colspan="2"><img src="../YA_LOGO.png" alt="YA"></td>
+      <td class="title" rowspan="2" colspan="2">
+		<img src="../Mastercam-Logo.jpg" alt="Mastercam">
+		</td>
+      <td class="lbl" colspan="2">ARBETSSTYCKE STORLEK</td>
+      <td class="val" colspan="2"></td>
+    </tr>
+    <tr>
+      <td class="lbl" colspan="2">OPERATION NR</td>
+      <td class="val" colspan="2">OP10 (program 200-10.NC)</td>
+    </tr>
+    <tr>
+      <td class="lbl">MASKIN</td>
+      <td class="val" colspan="3">HAAS ST-10 Svarv</td>
+      <td class="lbl">MATERIAL</td>
+      <td class="val" colspan="1">SS 1914 (11SMnPb30+C)</td>
+      <td class="lbl">PROGRAMMERARE</td>
+      <td class="val">Ihor Posunko</td>
+    </tr>
+    <tr>
+      <td class="lbl">PROJEKTNAMN</td>
+      <td class="val" colspan="3"></td>
+      <td class="lbl">RITNINGSNR</td>
+      <td class="val">200-10</td>
+      <td class="lbl">SKIFT / OPERATÖR</td>
+      <td class="val"></td>
+    </tr>
+    <tr><td class="band" colspan="8"></td></tr>
+  </table>
+
+  <table class="ops">
+    <thead>
+      <tr>
+        <th rowspan="2">Op nr</th>
+        <th rowspan="2">Operation</th>
+        <th rowspan="2">Verktygs-<br>specifikation</th>
+        <th rowspan="2">Vkt<br>nr</th>
+        <th colspan="3">Verktygsgeometri</th>
+        <th rowspan="2">Hållare</th>
+        <th rowspan="2">Skärhastighet<br>vc (m/min)</th>
+        <th rowspan="2">Matning<br>fn (mm/varv)</th>
+        <th rowspan="2">Skärdjup<br>ap (mm)</th>
+        <th rowspan="2">Tid<br>h:mm:ss</th>
+        <th rowspan="2">Anmärkningar</th>
+      </tr>
+      <tr>
+        <th>CR</th>
+        <th>Bredd</th>
+        <th>OH</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td class="l">Dynamisk grovsvarvning</td>
+        <td>RCKT 10 T3 M0-PM 4340</td>
+        <td>T2</td>
+        <td>5.0</td>
+        <td>25.0</td>
+        <td>170.0</td>
+        <td>SRDCN 3225P 10-A</td>
+        <td>295</td>
+        <td>0.2</td>
+        <td>1.5</td>
+        <td>0:02:05</td>
+        <td class="rem">Dynamic Rough</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td class="l">Finsvarvning</td>
+        <td>RCKT 10 T3 M0-PM 4340</td>
+        <td>T2</td>
+        <td>5.0</td>
+        <td>25.0</td>
+        <td>170.0</td>
+        <td>SRDCN 3225P 10-A</td>
+        <td>300</td>
+        <td>0.05</td>
+        <td>0.2</td>
+        <td>0:01:02</td>
+        <td class="rem">Finish Turn</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="total">
+    <tr>
+      <td class="gap" style="width:62%"></td>
+      <td class="tl" style="width:24%">Total tid h : min : sek</td>
+      <td class="tv">0:03:07</td>
+    </tr>
+  </table>
+
+  <table class="note">
+    <tr>
+      <td class="nh">Notering:
+      </td>
+    </tr>
+  </table>
+
+  <table class="sign">
+    <tr><th>UPPRÄTTAD AV</th><th>GODKÄND AV</th></tr>
+    <tr><td></td><td></td></tr>
+  </table>
+</div>
+  <div class="code-row">
+    <div class="code-block">
+      <h2>NC-program – O00010.NC</h2>
+      <div class="cnc" role="region" aria-label="NC-program O00010">
+        <div class="cnc-head"><span>MEM</span><span>O00010</span><span>N00000001</span></div>
+        <pre class="cnc-body"><span class="ln">%</span>
+<span class="ln cur">O00010</span>
+<span class="ln">(O00010)</span>
+<span class="ln">(DATE=DD-MM-YY - 23-10-26 TIME=HH:MM - 09:30)</span>
+<span class="ln">(MCAM FILE - C:\USERS\IHORP\DESKTOP\CNC SVARV\200-10\200-10.MCAM)</span>
+<span class="ln">(NC FILE - C:\USERS\IHORP\DESKTOP\CNC SVARV\200-10\O00010.NC)</span>
+<span class="ln">(MATERIAL - ALUMINUM MM - 2024)</span>
+<span class="ln">G18 G21 G40 G54 G99</span>
+<span class="ln">(TOOL - 2 OFFSET - 2)</span>
+<span class="ln">(OD TOOL - 10. BUTTON  INSERT - RCMT 10 T3 M0)</span>
+<span class="ln">(DYNAMIC ROUGH TURN)</span>
+<span class="ln">G00 T0202</span>
+<span class="ln">M8</span>
+<span class="ln">G97 S2500 M3</span>
+<span class="ln">G54</span>
+<span class="ln">G50 S2500</span>
+<span class="ln">G96 S295</span>
+<span class="ln">G00 Z5.917</span>
+<span class="ln">X3.349</span>
+<span class="ln">G99 G01 Z5.816 F.2</span>
+<span class="ln">X6.025 Z5.204</span>
+<span class="ln">G02 X7.898 Z5. R2.25</span>
+<span class="ln">G01 X8.981</span>
+<span class="ln">G03 X9.253 Z4.998 R5.</span>
+<span class="ln">X10.154 Z4.965 R5.</span>
+<span class="ln">X10.748 Z4.921 R5.</span>
+<span class="ln">X11.636 Z4.838 R30.4</span>
+<span class="ln">X12.522 Z4.748 R30.4</span>
+<span class="ln">X13.405 Z4.652 R30.4</span>
+<span class="ln">X14.285 Z4.549 R30.4</span>
+<span class="ln">X15.161 Z4.439 R30.4</span>
+<span class="ln">X16.034 Z4.324 R30.4</span>
+<span class="ln">X16.102 Z4.314 R30.4</span>
+<span class="ln">G01 X18.874 Z4.023</span>
+<span class="ln">X22.833 Z3.789</span>
+<span class="ln">X29.684 Z3.608</span>
+<span class="ln">X44.862 Z3.513</span>
+<span class="ln">X52.984 Z3.504</span>
+<span class="ln">X53.883 Z3.468</span>
+<span class="ln">X54.854 Z3.371</span>
+<span class="ln">X55.865 Z3.208</span>
+<span class="ln">X56.886 Z2.977</span>
+<span class="ln">X57.89 Z2.682</span>
+<span class="ln">X58.854 Z2.329</span>
+<span class="ln">X59.76 Z1.927</span>
+<span class="ln">X61.359 Z1.01</span>
+<span class="ln">X62.658 Z0.</span>
+<span class="ln">X63.679 Z-1.053</span>
+<span class="ln">X64.786 Z-2.643</span>
+<span class="ln">X65.521 Z-4.203</span>
+<span class="ln">X66.131 Z-6.214</span>
+<span class="ln">X66.603 Z-9.107</span>
+<span class="ln">X66.89 Z-13.749</span>
+<span class="ln">X66.999 Z-30.062</span>
+<span class="ln">X67. Z-65.447</span>
+<span class="ln">G02 X67.135 Z-65.891 R1.5</span>
+<span class="ln">X67.528 Z-66.296 R1.5</span>
+<span class="ln">X67.692 Z-66.405 R1.5</span>
+<span class="ln">G03 X68.237 Z-66.765 R5.</span>
+<span class="ln">G02 X69.636 Z-67.421 R2.25</span>
+<span class="ln">G01 X71.539 Z-67.99</span>
+<span class="ln">G03 X71.658 Z-68.094 R.122</span>
+<span class="ln">X71.635 Z-68.144 R.122</span>
+<span class="ln">X71.51 Z-68.184 R.069</span>
+<span class="ln">X71.434 Z-68.173 R.069</span>
+<span class="ln">G01 X71.235 Z-68.107</span>
+<span class="ln">X69.823 Z-67.641</span>
+<span class="ln">G03 X68.485 Z-66.954 R2.25</span>
+<span class="ln">G02 X67.692 Z-66.405 R5.</span>
+<span class="ln">X67.084 Z-66.071 R5.</span>
+<span class="ln">X67.016 Z-66.037 R5.</span>
+<span class="ln">G01 X66.461 Z-65.605</span>
+<span class="ln">X65.706 Z-64.603</span>
+<span class="ln">X65.102 Z-63.245</span>
+<span class="ln">X64.61 Z-61.284</span>
+<span class="ln">X64.228 Z-57.87</span>
+<span class="ln">X64.03 Z-50.737</span>
+<span class="ln">X63.918 Z-15.927</span>
+<span class="ln">X63.662 Z-10.844</span>
+<span class="ln">X63.248 Z-7.962</span>
+<span class="ln">X62.684 Z-5.943</span>
+<span class="ln">X61.939 Z-4.341</span>
+<span class="ln">X61.16 Z-3.259</span>
+<span class="ln">X60.621 Z-2.751</span>
+<span class="ln">X59.96 Z-2.26</span>
+<span class="ln">X59.194 Z-1.794</span>
+<span class="ln">X58.34 Z-1.361</span>
+<span class="ln">X56.439 Z-.606</span>
+<span class="ln">X54.386 Z.001</span>
+<span class="ln">X52.273 Z.476</span>
+<span class="ln">X49.106 Z.989</span>
+<span class="ln">X46.014 Z1.333</span>
+<span class="ln">X41.066 Z1.678</span>
+<span class="ln">X27.943 Z2.131</span>
+<span class="ln">G03 X27.064 Z2.229 R1.5</span>
+<span class="ln">X26.825 Z2.281 R1.5</span>
+<span class="ln">G02 X26.011 Z2.477 R30.4</span>
+<span class="ln">X25.191 Z2.668 R30.4</span>
+<span class="ln">X24.366 Z2.852 R30.4</span>
+<span class="ln">X23.536 Z3.03 R30.4</span>
+<span class="ln">X22.7 Z3.202 R30.4</span>
+<span class="ln">X21.859 Z3.367 R30.4</span>
+<span class="ln">X21.014 Z3.526 R30.4</span>
+<span class="ln">X20.164 Z3.68 R30.4</span>
+<span class="ln">X19.309 Z3.826 R30.4</span>
+<span class="ln">X18.45 Z3.966 R30.4</span>
+<span class="ln">X17.587 Z4.101 R30.4</span>
+<span class="ln">X16.72 Z4.228 R30.4</span>
+<span class="ln">X15.85 Z4.349 R30.4</span>
+<span class="ln">X14.976 Z4.463 R30.4</span>
+<span class="ln">G03 X11.584 Z6.644 R2.25</span>
+<span class="ln">X12.862 Z8.214 R2.25</span>
+<span class="ln">G00 X21.023</span>
+<span class="ln">Z6.561</span>
+<span class="ln">G01 X23.346 Z3.753</span>
+<span class="ln">G02 X25.609 Z2.572 R2.25</span>
+<span class="ln">G03 X26.832 Z2.279 R30.4</span>
+<span class="ln">X27.64 Z2.077 R30.4</span>
+<span class="ln">X28.441 Z1.869 R30.4</span>
+<span class="ln">X29.133 Z1.683 R30.4</span>
+<span class="ln">G01 X31.404 Z1.254</span>
+<span class="ln">X35.119 Z.802</span>
+<span class="ln">X43.246 Z.019</span>
+<span class="ln">X46.333 Z-.395</span>
+<span class="ln">X48.522 Z-.805</span>
+<span class="ln">X49.607 Z-1.079</span>
+<span class="ln">X50.643 Z-1.398</span>
+<span class="ln">X52.541 Z-2.16</span>
+<span class="ln">X54.18 Z-3.046</span>
+<span class="ln">X55.553 Z-4.016</span>
+<span class="ln">X56.676 Z-5.032</span>
+<span class="ln">X57.961 Z-6.588</span>
+<span class="ln">X58.87 Z-8.139</span>
+<span class="ln">X59.673 Z-10.161</span>
+<span class="ln">X60.264 Z-12.608</span>
+<span class="ln">X60.711 Z-16.386</span>
+<span class="ln">X60.95 Z-23.259</span>
+<span class="ln">X61.09 Z-53.507</span>
+<span class="ln">X61.353 Z-58.348</span>
+<span class="ln">X61.814 Z-61.268</span>
+<span class="ln">X62.426 Z-63.161</span>
+<span class="ln">X63.007 Z-64.255</span>
+<span class="ln">G02 X63.406 Z-64.659 R1.5</span>
+<span class="ln">X64.027 Z-64.984 R1.5</span>
+<span class="ln">X64.512 Z-65.138 R1.5</span>
+<span class="ln">G03 X65.299 Z-65.359 R5.</span>
+<span class="ln">G02 X67.104 Z-65.683 R2.25</span>
+<span class="ln">G01 X68.954 Z-65.803</span>
+<span class="ln">G03 X69.215 Z-65.951 R.15</span>
+<span class="ln">X69.199 Z-65.998 R.15</span>
+<span class="ln">G01 X69.191 Z-66.001</span>
+<span class="ln">X67.45 Z-65.847</span>
+<span class="ln">G03 X65.676 Z-65.484 R2.25</span>
+<span class="ln">G02 X64.512 Z-65.138 R5.</span>
+<span class="ln">X63.688 Z-64.953 R5.</span>
+<span class="ln">X63.599 Z-64.935 R5.</span>
+<span class="ln">G01 X62.797 Z-64.637</span>
+<span class="ln">X61.795 Z-63.971</span>
+<span class="ln">X60.802 Z-62.944</span>
+<span class="ln">X59.979 Z-61.65</span>
+<span class="ln">X59.23 Z-59.786</span>
+<span class="ln">X58.669 Z-57.338</span>
+<span class="ln">X58.256 Z-53.45</span>
+<span class="ln">X58.038 Z-45.86</span>
+<span class="ln">X57.998 Z-34.35</span>
+<span class="ln">Z-34.349</span>
+<span class="ln">G03 X58.13 Z-33.91 R1.5</span>
+<span class="ln">G02 X58.388 Z-33.477 R30.4</span>
+<span class="ln">X58.634 Z-33.042 R30.4</span>
+<span class="ln">X58.867 Z-32.605 R30.4</span>
+<span class="ln">X59.086 Z-32.167 R30.4</span>
+<span class="ln">X59.293 Z-31.727 R30.4</span>
+<span class="ln">X59.486 Z-31.286 R30.4</span>
+<span class="ln">X59.666 Z-30.843 R30.4</span>
+<span class="ln">X59.833 Z-30.399 R30.4</span>
+<span class="ln">X59.987 Z-29.954 R30.4</span>
+<span class="ln">X60.128 Z-29.508 R30.4</span>
+<span class="ln">X60.255 Z-29.061 R30.4</span>
+<span class="ln">X60.369 Z-28.613 R30.4</span>
+<span class="ln">X60.47 Z-28.163 R30.4</span>
+<span class="ln">X60.557 Z-27.714 R30.4</span>
+<span class="ln">X60.631 Z-27.264 R30.4</span>
+<span class="ln">X60.692 Z-26.813 R30.4</span>
+<span class="ln">X60.739 Z-26.362 R30.4</span>
+<span class="ln">X60.773 Z-25.91 R30.4</span>
+<span class="ln">X60.793 Z-25.459 R30.4</span>
+<span class="ln">X60.8 Z-25.007 R30.4</span>
+<span class="ln">G01 Z-25.</span>
+<span class="ln">G02 X60.793 Z-24.555 R30.4</span>
+<span class="ln">X60.774 Z-24.104 R30.4</span>
+<span class="ln">X60.74 Z-23.652 R30.4</span>
+<span class="ln">X60.693 Z-23.201 R30.4</span>
+<span class="ln">X60.633 Z-22.75 R30.4</span>
+<span class="ln">X60.56 Z-22.3 R30.4</span>
+<span class="ln">X60.473 Z-21.85 R30.4</span>
+<span class="ln">X60.372 Z-21.401 R30.4</span>
+<span class="ln">X60.259 Z-20.953 R30.4</span>
+<span class="ln">X60.132 Z-20.506 R30.4</span>
+<span class="ln">X59.992 Z-20.059 R30.4</span>
+<span class="ln">X59.838 Z-19.614 R30.4</span>
+<span class="ln">X59.672 Z-19.17 R30.4</span>
+<span class="ln">X59.492 Z-18.727 R30.4</span>
+<span class="ln">X59.299 Z-18.286 R30.4</span>
+<span class="ln">X59.093 Z-17.846 R30.4</span>
+<span class="ln">X59.075 Z-17.811 R30.4</span>
+<span class="ln">G01 X58.188 Z-15.44</span>
+<span class="ln">X56.888 Z-11.31</span>
+<span class="ln">X55.947 Z-9.295</span>
+<span class="ln">X54.849 Z-7.71</span>
+<span class="ln">X53.792 Z-6.64</span>
+<span class="ln">X52.419 Z-5.639</span>
+<span class="ln">X50.789 Z-4.753</span>
+<span class="ln">X48.978 Z-3.99</span>
+<span class="ln">X47.063 Z-3.345</span>
+<span class="ln">X44.123 Z-2.569</span>
+<span class="ln">X39.069 Z-1.583</span>
+<span class="ln">G03 X38.271 Z-1.375 R1.5</span>
+<span class="ln">X38.156 Z-1.331 R1.5</span>
+<span class="ln">G02 X37.448 Z-1.051 R30.4</span>
+<span class="ln">X36.733 Z-.775 R30.4</span>
+<span class="ln">X36.009 Z-.505 R30.4</span>
+<span class="ln">X35.277 Z-.24 R30.4</span>
+<span class="ln">X34.537 Z.02 R30.4</span>
+<span class="ln">X33.789 Z.273 R30.4</span>
+<span class="ln">X33.034 Z.521 R30.4</span>
+<span class="ln">X32.272 Z.764 R30.4</span>
+<span class="ln">X31.503 Z1.001 R30.4</span>
+<span class="ln">X30.727 Z1.232 R30.4</span>
+<span class="ln">X29.944 Z1.457 R30.4</span>
+<span class="ln">X29.154 Z1.677 R30.4</span>
+<span class="ln">X28.358 Z1.891 R30.4</span>
+<span class="ln">G03 X25.957 Z3.881 R2.25</span>
+<span class="ln">X28.059 Z5.785 R2.25</span>
+<span class="ln">G00 X35.01</span>
+<span class="ln">Z3.517</span>
+<span class="ln">G01 X35.352 Z.73</span>
+<span class="ln">G02 X37.098 Z-.914 R2.25</span>
+<span class="ln">G03 X38.162 Z-1.334 R30.4</span>
+<span class="ln">X38.861 Z-1.62 R30.4</span>
+<span class="ln">X39.552 Z-1.912 R30.4</span>
+<span class="ln">X40.234 Z-2.208 R30.4</span>
+<span class="ln">X40.907 Z-2.509 R30.4</span>
+<span class="ln">X40.955 Z-2.532 R30.4</span>
+<span class="ln">G01 X45.139 Z-4.37</span>
+<span class="ln">X46.701 Z-5.2</span>
+<span class="ln">X48.106 Z-6.1</span>
+<span class="ln">X50.169 Z-7.809</span>
+<span class="ln">G02 X50.342 Z-7.954 R1.5</span>
+<span class="ln">G03 X50.843 Z-8.329 R30.4</span>
+<span class="ln">X51.333 Z-8.709 R30.4</span>
+<span class="ln">X51.811 Z-9.092 R30.4</span>
+<span class="ln">X52.279 Z-9.479 R30.4</span>
+<span class="ln">X52.734 Z-9.869 R30.4</span>
+<span class="ln">X53.178 Z-10.262 R30.4</span>
+<span class="ln">X53.61 Z-10.659 R30.4</span>
+<span class="ln">X54.03 Z-11.059 R30.4</span>
+<span class="ln">X54.439 Z-11.463 R30.4</span>
+<span class="ln">X54.835 Z-11.868 R30.4</span>
+<span class="ln">X55.219 Z-12.277 R30.4</span>
+<span class="ln">X55.591 Z-12.689 R30.4</span>
+<span class="ln">X55.951 Z-13.104 R30.4</span>
+<span class="ln">X56.298 Z-13.521 R30.4</span>
+<span class="ln">X56.633 Z-13.94 R30.4</span>
+<span class="ln">X56.956 Z-14.362 R30.4</span>
+<span class="ln">X57.266 Z-14.787 R30.4</span>
+<span class="ln">X57.563 Z-15.213 R30.4</span>
+<span class="ln">X57.848 Z-15.642 R30.4</span>
+<span class="ln">X58.119 Z-16.073 R30.4</span>
+<span class="ln">X58.378 Z-16.506 R30.4</span>
+<span class="ln">X58.624 Z-16.94 R30.4</span>
+<span class="ln">X58.857 Z-17.377 R30.4</span>
+<span class="ln">X59.077 Z-17.815 R30.4</span>
+<span class="ln">X59.284 Z-18.255 R30.4</span>
+<span class="ln">G02 X63.672 Z-20.006 R2.25</span>
+<span class="ln">X66.731 Z-19.405 R2.25</span>
+<span class="ln">G00 Z-11.818</span>
+<span class="ln">X57.795</span>
+<span class="ln">G01 X51.751 Z-8.919</span>
+<span class="ln">G03 X51.085 Z-8.515 R2.25</span>
+<span class="ln">G02 X50.338 Z-7.95 R30.4</span>
+<span class="ln">X49.825 Z-7.578 R30.4</span>
+<span class="ln">X49.302 Z-7.21 R30.4</span>
+<span class="ln">X48.768 Z-6.846 R30.4</span>
+<span class="ln">X48.223 Z-6.485 R30.4</span>
+<span class="ln">X47.667 Z-6.129 R30.4</span>
+<span class="ln">X47.101 Z-5.777 R30.4</span>
+<span class="ln">X46.525 Z-5.429 R30.4</span>
+<span class="ln">X45.938 Z-5.085 R30.4</span>
+<span class="ln">X45.341 Z-4.747 R30.4</span>
+<span class="ln">X44.734 Z-4.412 R30.4</span>
+<span class="ln">X44.117 Z-4.081 R30.4</span>
+<span class="ln">X43.491 Z-3.756 R30.4</span>
+<span class="ln">X42.854 Z-3.436 R30.4</span>
+<span class="ln">X42.209 Z-3.119 R30.4</span>
+<span class="ln">X41.554 Z-2.808 R30.4</span>
+<span class="ln">X40.89 Z-2.502 R30.4</span>
+<span class="ln">X40.216 Z-2.2 R30.4</span>
+<span class="ln">G03 X39.082 Z-1.428 R2.25</span>
+<span class="ln">G01 X38.026 Z-.241</span>
+<span class="ln">G03 X37.622 Z.709 R2.337</span>
+<span class="ln">X38.515 Z2.083 R2.337</span>
+<span class="ln">G00 X63.808</span>
+<span class="ln">Z-29.397</span>
+<span class="ln">G03 X61.095 Z-31.428 R10.578</span>
+<span class="ln">G01 X59.413 Z-32.418</span>
+<span class="ln">G02 X58.511 Z-33.264 R2.25</span>
+<span class="ln">G03 X58.128 Z-33.913 R30.4</span>
+<span class="ln">X57.856 Z-34.344 R30.4</span>
+<span class="ln">X57.572 Z-34.773 R30.4</span>
+<span class="ln">X57.276 Z-35.2 R30.4</span>
+<span class="ln">X56.966 Z-35.624 R30.4</span>
+<span class="ln">G01 X56.296 Z-36.878</span>
+<span class="ln">X55.731 Z-38.772</span>
+<span class="ln">X55.324 Z-41.706</span>
+<span class="ln">X55.136 Z-46.546</span>
+<span class="ln">X55.26 Z-52.313</span>
+<span class="ln">X55.638 Z-56.213</span>
+<span class="ln">X56.154 Z-58.695</span>
+<span class="ln">X56.843 Z-60.628</span>
+<span class="ln">X57.61 Z-62.034</span>
+<span class="ln">X58.578 Z-63.252</span>
+<span class="ln">X59.351 Z-63.952</span>
+<span class="ln">G02 X59.929 Z-64.296 R1.5</span>
+<span class="ln">X60.687 Z-64.54 R1.5</span>
+<span class="ln">X61.47 Z-64.654 R1.5</span>
+<span class="ln">G03 X62.357 Z-64.741 R5.</span>
+<span class="ln">G02 X63.417 Z-64.804 R2.25</span>
+<span class="ln">X64.273 Z-64.763 R2.25</span>
+<span class="ln">G01 X65.947 Z-64.601</span>
+<span class="ln">G02 X66.134 Z-64.546 R.161</span>
+<span class="ln">G01 X66.262 Z-64.468</span>
+<span class="ln">G03 X66.511 Z-64.41 R.162</span>
+<span class="ln">X66.738 Z-64.457 R.162</span>
+<span class="ln">X66.833 Z-64.57 R.16</span>
+<span class="ln">X66.628 Z-64.719 R.16</span>
+<span class="ln">X66.56 Z-64.728 R.16</span>
+<span class="ln">G01 X64.706 Z-64.865</span>
+<span class="ln">G03 X64.05 Z-64.889 R2.25</span>
+<span class="ln">X62.793 Z-64.799 R2.25</span>
+<span class="ln">G02 X61.47 Z-64.654 R5.</span>
+<span class="ln">X60.572 Z-64.608 R5.</span>
+<span class="ln">X60.476 Z-64.606 R5.</span>
+<span class="ln">G01 X59.64 Z-64.471</span>
+<span class="ln">X58.54 Z-64.07</span>
+<span class="ln">X57.28 Z-63.34</span>
+<span class="ln">X56.083 Z-62.32</span>
+<span class="ln">X55.057 Z-61.075</span>
+<span class="ln">X54.059 Z-59.29</span>
+<span class="ln">X53.348 Z-57.335</span>
+<span class="ln">X52.725 Z-54.424</span>
+<span class="ln">X52.336 Z-50.523</span>
+<span class="ln">X52.235 Z-45.675</span>
+<span class="ln">X52.448 Z-41.765</span>
+<span class="ln">X52.61 Z-40.531</span>
+<span class="ln">G03 X52.811 Z-40.093 R1.5</span>
+<span class="ln">X52.987 Z-39.908 R1.5</span>
+<span class="ln">G02 X53.424 Z-39.513 R30.4</span>
+<span class="ln">X53.85 Z-39.114 R30.4</span>
+<span class="ln">X54.263 Z-38.712 R30.4</span>
+<span class="ln">X54.665 Z-38.307 R30.4</span>
+<span class="ln">X55.054 Z-37.9 R30.4</span>
+<span class="ln">X55.432 Z-37.489 R30.4</span>
+<span class="ln">X55.797 Z-37.077 R30.4</span>
+<span class="ln">X56.15 Z-36.66 R30.4</span>
+<span class="ln">X56.49 Z-36.242 R30.4</span>
+<span class="ln">X56.818 Z-35.821 R30.4</span>
+<span class="ln">X57.133 Z-35.398 R30.4</span>
+<span class="ln">X57.436 Z-34.972 R30.4</span>
+<span class="ln">G03 X61.687 Z-33.46 R2.25</span>
+<span class="ln">X65.091 Z-34.238 R2.25</span>
+<span class="ln">G00 Z-37.948</span>
+<span class="ln">X62.154</span>
+<span class="ln">G03 X62.026 Z-37.953 R2.25</span>
+<span class="ln">G01 X57.266 Z-38.133</span>
+<span class="ln">G02 X53.635 Z-39.317 R2.25</span>
+<span class="ln">G03 X52.983 Z-39.911 R30.4</span>
+<span class="ln">X52.534 Z-40.303 R30.4</span>
+<span class="ln">X52.074 Z-40.692 R30.4</span>
+<span class="ln">G01 X51.251 Z-41.61</span>
+<span class="ln">X50.557 Z-42.888</span>
+<span class="ln">X49.975 Z-44.77</span>
+<span class="ln">X49.623 Z-47.235</span>
+<span class="ln">X49.554 Z-50.652</span>
+<span class="ln">X49.858 Z-54.069</span>
+<span class="ln">X50.368 Z-56.56</span>
+<span class="ln">X51.038 Z-58.544</span>
+<span class="ln">X51.984 Z-60.392</span>
+<span class="ln">X52.967 Z-61.731</span>
+<span class="ln">X54.153 Z-62.903</span>
+<span class="ln">X55.495 Z-63.853</span>
+<span class="ln">X56.01 Z-64.136</span>
+<span class="ln">G02 X56.722 Z-64.411 R1.5</span>
+<span class="ln">X57.565 Z-64.568 R1.5</span>
+<span class="ln">X58.179 Z-64.6 R1.5</span>
+<span class="ln">G01 X60.</span>
+<span class="ln">G03 X60.902 Z-64.621 R5.</span>
+<span class="ln">X62.762 Z-64.778 R5.</span>
+<span class="ln">G02 X63.15 Z-64.803 R.75</span>
+<span class="ln">X64.65 Z-64.053 R.75</span>
+<span class="ln">X63.594 Z-63.337 R.75</span>
+<span class="ln">X63.15 Z-63.303 R.75</span>
+<span class="ln">X61.819 Z-63.708 R.75</span>
+<span class="ln">G01 X61.524 Z-63.993</span>
+<span class="ln">G03 X59.526 Z-64.6 R1.125</span>
+<span class="ln">G01 X56.58 Z-64.582</span>
+<span class="ln">X55.486 Z-64.362</span>
+<span class="ln">X54.089 Z-63.854</span>
+<span class="ln">X52.64 Z-63.06</span>
+<span class="ln">X51.295 Z-62.021</span>
+<span class="ln">X50.125 Z-60.787</span>
+<span class="ln">X49.156 Z-59.404</span>
+<span class="ln">X48.219 Z-57.525</span>
+<span class="ln">X47.444 Z-55.122</span>
+<span class="ln">X46.93 Z-52.2</span>
+<span class="ln">X46.769 Z-49.236</span>
+<span class="ln">X46.918 Z-46.734</span>
+<span class="ln">X47.417 Z-44.341</span>
+<span class="ln">G03 X47.687 Z-43.911 R1.5</span>
+<span class="ln">X48.012 Z-43.651 R1.5</span>
+<span class="ln">G02 X48.561 Z-43.292 R30.4</span>
+<span class="ln">X49.099 Z-42.93 R30.4</span>
+<span class="ln">X49.627 Z-42.563 R30.4</span>
+<span class="ln">X50.143 Z-42.193 R30.4</span>
+<span class="ln">X50.649 Z-41.818 R30.4</span>
+<span class="ln">X51.143 Z-41.44 R30.4</span>
+<span class="ln">X51.626 Z-41.058 R30.4</span>
+<span class="ln">X52.097 Z-40.672 R30.4</span>
+<span class="ln">X52.557 Z-40.283 R30.4</span>
+<span class="ln">G03 X55.475 Z-39.444 R1.688</span>
+<span class="ln">X58.851 Z-41.132 R1.688</span>
+<span class="ln">X58.797 Z-41.431 R1.688</span>
+<span class="ln">G00 Z-42.491</span>
+<span class="ln">X57.477</span>
+<span class="ln">G03 X55.475 Z-42.819 R1.687</span>
+<span class="ln">X54.167 Z-42.688 R1.687</span>
+<span class="ln">G01 X53.291 Z-42.504</span>
+<span class="ln">G02 X51.838 Z-42.357 R1.875</span>
+<span class="ln">X48.827 Z-43.115 R1.875</span>
+<span class="ln">G03 X48.007 Z-43.654 R30.4</span>
+<span class="ln">X47.447 Z-44.009 R30.4</span>
+<span class="ln">X46.877 Z-44.359 R30.4</span>
+<span class="ln">G01 X46.003 Z-45.218</span>
+<span class="ln">X45.252 Z-46.422</span>
+<span class="ln">X44.725 Z-47.839</span>
+<span class="ln">X44.374 Z-49.776</span>
+<span class="ln">X44.336 Z-52.208</span>
+<span class="ln">X44.664 Z-54.659</span>
+<span class="ln">X45.215 Z-56.66</span>
+<span class="ln">X46.04 Z-58.58</span>
+<span class="ln">X47.171 Z-60.376</span>
+<span class="ln">X48.306 Z-61.682</span>
+<span class="ln">X49.639 Z-62.833</span>
+<span class="ln">X51.138 Z-63.791</span>
+<span class="ln">X51.999 Z-64.215</span>
+<span class="ln">G02 X52.751 Z-64.463 R1.5</span>
+<span class="ln">X53.616 Z-64.588 R1.5</span>
+<span class="ln">X54.005 Z-64.6 R1.5</span>
+<span class="ln">G01 X58.617 Z-64.591</span>
+<span class="ln">G02 X60.091 Z-63.842 R.75</span>
+<span class="ln">X58.591 Z-63.091 R.75</span>
+<span class="ln">X58.361 Z-63.1 R.75</span>
+<span class="ln">X57.199 Z-63.562 R.75</span>
+<span class="ln">G01 X56.743 Z-64.129</span>
+<span class="ln">G03 X55.351 Z-64.6 R.75</span>
+<span class="ln">G01 X52.915</span>
+<span class="ln">X52.75</span>
+<span class="ln">X51.816 Z-64.492</span>
+<span class="ln">X50.419 Z-64.125</span>
+<span class="ln">X48.859 Z-63.47</span>
+<span class="ln">X47.334 Z-62.558</span>
+<span class="ln">X45.953 Z-61.439</span>
+<span class="ln">X44.763 Z-60.157</span>
+<span class="ln">X43.562 Z-58.388</span>
+<span class="ln">X42.673 Z-56.491</span>
+<span class="ln">X42.074 Z-54.514</span>
+<span class="ln">X41.722 Z-52.099</span>
+<span class="ln">X41.741 Z-50.106</span>
+<span class="ln">X42.081 Z-48.193</span>
+<span class="ln">X42.468 Z-47.095</span>
+<span class="ln">G03 X42.789 Z-46.675 R1.5</span>
+<span class="ln">X43.266 Z-46.358 R1.499</span>
+<span class="ln">G02 X43.896 Z-46.035 R30.4</span>
+<span class="ln">X44.516 Z-45.706 R30.4</span>
+<span class="ln">X45.126 Z-45.373 R30.4</span>
+<span class="ln">X45.727 Z-45.035 R30.4</span>
+<span class="ln">X46.317 Z-44.694 R30.4</span>
+<span class="ln">X46.898 Z-44.347 R30.4</span>
+<span class="ln">X47.467 Z-43.996 R30.4</span>
+<span class="ln">G03 X49.224 Z-43.574 R1.125</span>
+<span class="ln">X51.474 Z-44.7 R1.125</span>
+<span class="ln">X50.39 Z-45.661 R1.125</span>
+<span class="ln">X49.224 Z-45.824 R1.125</span>
+<span class="ln">X48.767 Z-45.801 R1.125</span>
+<span class="ln">G01 X46.294 Z-45.545</span>
+<span class="ln">G02 X45.837 Z-45.521 R1.125</span>
+<span class="ln">X44.202 Z-45.873 R1.125</span>
+<span class="ln">G03 X43.26 Z-46.361 R30.4</span>
+<span class="ln">X42.621 Z-46.68 R30.4</span>
+<span class="ln">X42.178 Z-46.895 R30.4</span>
+<span class="ln">G01 X41.296 Z-47.583</span>
+<span class="ln">X40.47 Z-48.636</span>
+<span class="ln">X39.871 Z-49.93</span>
+<span class="ln">X39.534 Z-51.369</span>
+<span class="ln">X39.463 Z-53.273</span>
+<span class="ln">X39.749 Z-55.215</span>
+<span class="ln">X40.369 Z-57.137</span>
+<span class="ln">X41.321 Z-58.987</span>
+<span class="ln">X42.325 Z-60.381</span>
+<span class="ln">X43.542 Z-61.665</span>
+<span class="ln">X44.962 Z-62.807</span>
+<span class="ln">X46.846 Z-63.915</span>
+<span class="ln">G02 X47.569 Z-64.183 R1.5</span>
+<span class="ln">X48.241 Z-64.311 R1.5</span>
+<span class="ln">X49.123 Z-64.411 R9.6</span>
+<span class="ln">X50.012 Z-64.49 R9.6</span>
+<span class="ln">X50.908 Z-64.547 R9.6</span>
+<span class="ln">X51.809 Z-64.584 R9.6</span>
+<span class="ln">X52.712 Z-64.6 R9.6</span>
+<span class="ln">X52.915 R9.6</span>
+<span class="ln">G01 X53.818</span>
+<span class="ln">G02 X55.318 Z-63.85 R.75</span>
+<span class="ln">X53.818 Z-63.1 R.75</span>
+<span class="ln">X52.879 Z-63.265 R.75</span>
+<span class="ln">X52.59 Z-63.419 R.75</span>
+<span class="ln">G01 X51.79 Z-63.99</span>
+<span class="ln">G03 X49.948 Z-64.469 R1.125</span>
+<span class="ln">X49.554 Z-64.452 R1.125</span>
+<span class="ln">X48.229 Z-64.309 R9.6</span>
+<span class="ln">X47.359 Z-64.189 R9.6</span>
+<span class="ln">X46.5 Z-64.049 R9.6</span>
+<span class="ln">G01 X45.154 Z-63.685</span>
+<span class="ln">X43.606 Z-63.021</span>
+<span class="ln">X42.082 Z-62.093</span>
+<span class="ln">X40.703 Z-60.961</span>
+<span class="ln">X39.524 Z-59.676</span>
+<span class="ln">X38.564 Z-58.282</span>
+<span class="ln">X37.679 Z-56.438</span>
+<span class="ln">X37.147 Z-54.536</span>
+<span class="ln">X36.982 Z-52.631</span>
+<span class="ln">X37.132 Z-51.152</span>
+<span class="ln">X37.736 Z-49.35</span>
+<span class="ln">G03 X38.08 Z-48.934 R1.5</span>
+<span class="ln">X38.378 Z-48.729 R1.5</span>
+<span class="ln">X38.984 Z-48.394 R9.6</span>
+<span class="ln">X39.621 Z-48.074 R9.6</span>
+<span class="ln">X40.215 Z-47.8 R9.6</span>
+<span class="ln">G02 X40.889 Z-47.498 R30.4</span>
+<span class="ln">X41.553 Z-47.193 R30.4</span>
+<span class="ln">X42.208 Z-46.881 R30.4</span>
+<span class="ln">X42.853 Z-46.565 R30.4</span>
+<span class="ln">G03 X44.439 Z-46.238 R1.125</span>
+<span class="ln">X46.689 Z-47.363 R1.125</span>
+<span class="ln">X45.371 Z-48.387 R1.125</span>
+<span class="ln">X44.439 Z-48.488 R1.125</span>
+<span class="ln">X43.511 Z-48.388 R1.125</span>
+<span class="ln">G01 X41.815 Z-48.004</span>
+<span class="ln">G02 X40.887 Z-47.904 R1.125</span>
+<span class="ln">X39.29 Z-48.236 R1.125</span>
+<span class="ln">X38.37 Z-48.733 R9.6</span>
+<span class="ln">X37.796 Z-49.083 R9.6</span>
+<span class="ln">X37.256 Z-49.444 R9.6</span>
+<span class="ln">X36.751 Z-49.819 R9.6</span>
+<span class="ln">G01 X35.928 Z-50.735</span>
+<span class="ln">X35.321 Z-51.918</span>
+<span class="ln">X35.005 Z-53.264</span>
+<span class="ln">X34.986 Z-54.699</span>
+<span class="ln">X35.248 Z-56.168</span>
+<span class="ln">X35.948 Z-57.99</span>
+<span class="ln">X36.791 Z-59.396</span>
+<span class="ln">X37.877 Z-60.72</span>
+<span class="ln">X38.326 Z-61.171</span>
+<span class="ln">G02 X38.784 Z-61.499 R1.5</span>
+<span class="ln">X39.411 Z-61.825 R9.6</span>
+<span class="ln">X40.068 Z-62.135 R9.6</span>
+<span class="ln">X40.754 Z-62.428 R9.6</span>
+<span class="ln">X41.466 Z-62.706 R9.6</span>
+<span class="ln">X42.204 Z-62.968 R9.6</span>
+<span class="ln">X42.965 Z-63.211 R9.6</span>
+<span class="ln">X43.749 Z-63.435 R9.6</span>
+<span class="ln">X44.553 Z-63.642 R9.6</span>
+<span class="ln">X45.375 Z-63.829 R9.6</span>
+<span class="ln">X46.214 Z-63.996 R9.6</span>
+<span class="ln">X47.068 Z-64.144 R9.6</span>
+<span class="ln">X47.934 Z-64.272 R9.6</span>
+<span class="ln">X48.907 Z-64.336 R1.875</span>
+<span class="ln">X52.657 Z-62.461 R1.875</span>
+<span class="ln">X51.823 Z-61.282 R1.875</span>
+<span class="ln">G00 Z-60.711</span>
+<span class="ln">X47.56</span>
+<span class="ln">G02 X45.905 Z-61.337 R1.875</span>
+<span class="ln">G01 X45.305 Z-61.738</span>
+<span class="ln">G03 X42.303 Z-62.489 R1.875</span>
+<span class="ln">X39.727 Z-61.977 R1.875</span>
+<span class="ln">X38.776 Z-61.495 R9.6</span>
+<span class="ln">X38.18 Z-61.155 R9.6</span>
+<span class="ln">X37.618 Z-60.801 R9.6</span>
+<span class="ln">X37.089 Z-60.435 R9.6</span>
+<span class="ln">X36.595 Z-60.057 R9.6</span>
+<span class="ln">X36.137 Z-59.667 R9.6</span>
+<span class="ln">X35.716 Z-59.267 R9.6</span>
+<span class="ln">X35.334 Z-58.858 R9.6</span>
+<span class="ln">X34.99 Z-58.441 R9.6</span>
+<span class="ln">X34.687 Z-58.016 R9.6</span>
+<span class="ln">X34.423 Z-57.583 R9.6</span>
+<span class="ln">X34.2 Z-57.145 R9.6</span>
+<span class="ln">X34.019 Z-56.703 R9.6</span>
+<span class="ln">X33.88 Z-56.257 R9.6</span>
+<span class="ln">X33.783 Z-55.807 R9.6</span>
+<span class="ln">X33.728 Z-55.356 R9.6</span>
+<span class="ln">X33.715 Z-55. R9.6</span>
+<span class="ln">X33.716 Z-54.905 R9.6</span>
+<span class="ln">X33.746 Z-54.453 R9.6</span>
+<span class="ln">X33.819 Z-54.003 R9.6</span>
+<span class="ln">X33.934 Z-53.555 R9.6</span>
+<span class="ln">X34.091 Z-53.11 R9.6</span>
+<span class="ln">X34.289 Z-52.669 R9.6</span>
+<span class="ln">X34.529 Z-52.234 R9.6</span>
+<span class="ln">X34.81 Z-51.804 R9.6</span>
+<span class="ln">X35.131 Z-51.382 R9.6</span>
+<span class="ln">X35.491 Z-50.968 R9.6</span>
+<span class="ln">X35.889 Z-50.563 R9.6</span>
+<span class="ln">X36.326 Z-50.167 R9.6</span>
+<span class="ln">X36.799 Z-49.782 R9.6</span>
+<span class="ln">X37.307 Z-49.409 R9.6</span>
+<span class="ln">X38.73 Z-48.767 R2.25</span>
+<span class="ln">G01 X43.453 Z-47.415</span>
+<span class="ln">X43.594 Z-47.344</span>
+<span class="ln">(FINISH TURN)</span>
+<span class="ln">G97 S1506</span>
+<span class="ln">G96 S300</span>
+<span class="ln">G00 G42 X63.4</span>
+<span class="ln">Z15.3</span>
+<span class="ln">X.055</span>
+<span class="ln">G01 X0. Z0. F.05</span>
+<span class="ln">G03 X50. Z-25. R25.</span>
+<span class="ln">X33.072 Z-43.75 R25.</span>
+<span class="ln">G02 X22.915 Z-55. R15.</span>
+<span class="ln">X52.915 Z-70. R15.</span>
+<span class="ln">G01 X60.</span>
+<span class="ln">G40 X62.828 Z-68.586</span>
+<span class="ln">M9</span>
+<span class="ln">M5</span>
+<span class="ln">G00 G53 X0.</span>
+<span class="ln">G53 Z0.</span>
+<span class="ln">M30</span>
+<span class="ln">%</span></pre>
+      </div>
+    </div>
+    <div class="checklist-block">
+      <h2>Checklista</h2>
+      <ol class="checks">
+        <li><label><input type="checkbox"><span>Följ säkerhetsföreskrifterna</span></label></li>
+        <li><label><input type="checkbox"><span>Simulera CAM-programmet / postprocessad kod</span></label></li>
+        <li><label><input type="checkbox"><span>Överför det kodade programmet till CNC-maskinen</span></label></li>
+        <li><label><input type="checkbox"><span>Montera och förbered chucken</span></label></li>
+        <li><label><input type="checkbox"><span>Ställ in spänntryck för chuck</span></label></li>
+        <li><label><input type="checkbox"><span>Mata ut materialet till dokumenterad längd / spänn fast materialet</span></label></li>
+        <li><label><input type="checkbox"><span>Montera verktyg enligt uppställningsbladet (montera skär)</span></label></li>
+        <li><label><input type="checkbox"><span>Mät in verktygen och indikera borrarna</span></label></li>
+        <li><label><input type="checkbox"><span>Ställ in nollpunktsförskjutning G54/Z0 i maskinen</span></label></li>
+        <li><label><input type="checkbox"><span>Justera kylmedelsslangarna för optimalt flöde</span></label></li>
+        <li><label><input type="checkbox"><span>Simulera programmet i maskinen</span></label></li>
+        <li><label><input type="checkbox"><span>Torrkör detaljen med 155 mm positiv Z-förskjutning och reducerad snabbtransport och matning</span></label></li>
+        <li><label><input type="checkbox"><span>Verifiera och dubbelkontrollera hela processen</span></label></li>
+        <li><label><input type="checkbox"><span>Kör programmet med valfritt stopp (optional stop) och reducerad snabbtransport</span></label></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- INSP:200-10 -->
+  <section class="inspection-block" id="slutkontrollrapport">
+<div class="sheet">
+<header><h1>SLUTKONTROLLRAPPORT</h1></header>
+<div class="fields">
+<div><div class="lbl">OPERATÖRENS NAMN</div><div class="val"></div></div>
+<div><div class="lbl">DELNR / REV</div><div class="val">200-10 / –</div></div>
+<div><div class="lbl">KONTROLLANT</div><div class="val"></div></div>
+</div>
+<div class="tol"><b>TOLERANSBLOCK</b><span>ISO 2768-1-m: 3–6 ±0,1 | 6–30 ±0,2 | 30–120 ±0,3</span><span>ISO 2768-1-c (fas/radie): 0,5–3 ±0,2 | 3–6 ±0,5 | över 6 ±1</span></div>
+<div class="scroll">
+<table>
+<tr class="hint"><td colspan="6"></td><td colspan="2">(ENDAST KONTROLLANT)</td></tr>
+<thead><tr><th>MÅTT NR</th><th>KRAV</th><th>OPERATÖRENS UTFALL</th><th>VERKTYG</th><th>KONTROLLANTENS UTFALL</th><th>VERKTYG</th><th class="insp">GODKÄND</th><th class="insp">UNDERKÄND</th></tr></thead>
+<tbody>
+<tr><td class="nr">1</td><td class="req">Ø60 ±0,3</td><td></td><td>Mikrometer 50–75</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">2</td><td class="req">33,07 ±0,3 (vid övergång R15/R25)</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">3</td><td class="req">100 ±0,3 (totallängd)</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">4</td><td class="req">30 ±0,2 (längd Ø60)</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">5</td><td class="req">43,75 ±0,3</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">6</td><td class="req">R25 ±1</td><td></td><td>Radiemall</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">7</td><td class="req">R15 ±1</td><td></td><td>Radiemall</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">8</td><td class="req">Ra 3,2 (sfärisk yta)</td><td></td><td>Ytjämnhetsprov</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="notes" colspan="8"><strong>ANTECKNINGAR</strong>Material 11SMnPb30 · Ritning 200-10 · Benämning: Axel</td></tr>
+</tbody>
+</table>
+</div>
+<div class="rule"></div>
+<p class="cert">Jag har kontrollerat ovan nämnda del och intygar att måtten är korrekta.</p>
+<div class="sign">
+<div><span><b>SIGNATUR:</b> OPERATÖR</span><span><b>DATUM:</b></span></div>
+<div><span><b>SIGNATUR:</b> KONTROLLANT</span><span><b>DATUM:</b></span></div>
+</div>
+</div>
+  </section>
+  <!-- /INSP:200-10 -->
+</body>
+</html>

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>200-02</title>
+  <style>
+    :root {
+      --bg: #f5f6f7; --surface: #ffffff; --text: #1d2327;
+      --muted: #5b6770; --line: #d5dade; --accent: #1f4e79; --head-bg: #e6edf3;
+      --sheet: #ffffff; --band: #d9d9d9; --head: #f2f2f2; --title: #2f7aa8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14181b; --surface: #1c2125; --text: #e6e9eb;
+        --muted: #9aa5ad; --line: #333b41; --accent: #7fb2e0; --head-bg: #232a30;
+        --sheet: #1c2125; --band: #2b3238; --head: #232a30; --title: #7fb2e0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 2rem 1rem; background: var(--bg); color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.55; }
+    h1 { margin: 0 0 1rem; font-size: 1.7rem; color: var(--accent); }
+    .viewers { display: flex; gap: 1rem; align-items: stretch; flex-wrap: wrap; margin-bottom: 2rem; }
+    .viewers iframe { flex: 1 1 45%; min-width: 280px; height: 75vh; border: none; }
+    .layout { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; width: 100%; margin-bottom: 2rem; }
+    main { background: var(--surface); border: 1px solid var(--line);
+      border-radius: 6px; padding: 2rem; flex: 1 1 420px; min-width: 280px; }
+    .intro { margin: 0 0 1.5rem; color: var(--muted); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; vertical-align: top; padding: .7rem .9rem; border: 1px solid var(--line); }
+    thead th { background: var(--head-bg); }
+    tbody th { font-weight: 600; width: 38%; }
+    footer { margin-top: 1.25rem; font-size: .9rem; color: var(--muted); }
+	 .sheet {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--sheet);
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid var(--line); padding: 5px 8px; vertical-align: middle; }
+  .top td { height: 30px; }
+  .top .logo { width: 22%; height: 78px; color: var(--muted); text-align: center; font-size: 12px; }
+  .top .logo img { max-height: 60px; max-width: 100%; width: auto; display: inline-block; }
+  .top .title { text-align: center; color: var(--title); font-size: 18px; font-weight: 400; }
+  .top .title img { width: 100%; height: 60px; object-fit: contain; display: block; }
+  .lbl { font-weight: 700; }
+  .val { text-align: center; font-weight: 700; }
+  .band { height: 14px; background: var(--band); padding: 0; }
+  .ops { margin-top: 0; }
+  .ops thead th { background: var(--head); font-weight: 700; text-align: center; }
+  .ops td { text-align: center; }
+  .ops td.l { text-align: left; }
+  .ops .rem { text-align: left; width: 20%; font-size: 12px; }
+  .total td { border: 1px solid var(--line); }
+  .total .gap { border: none; }
+  .total .tl { text-align: right; font-weight: 700; }
+  .total .tv { text-align: center; font-weight: 700; }
+  .note { margin-top: 1.6rem; }
+  .note td { height: 90px; vertical-align: top; }
+  .note .nh { font-weight: 700; }
+  .note p { margin: .25rem 0 0; }
+  .sign { margin-top: 0; }
+  .sign th { background: var(--band); text-align: center; font-weight: 700; width: 50%; }
+  .sign td { height: 34px; }
+  .page { text-align: right; font-size: 11px; margin-top: .4rem; color: var(--muted); }
+  @media print {
+    body { background: #fff; color: #000; padding: 0; }
+    .sheet { padding: 0; max-width: none; background: #fff; }
+    :root { --line: #6f6f6f; --band: #d9d9d9; --head: #f2f2f2; --title: #2f7aa8; --muted: #6b6b6b; }
+  }
+    .code-row { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; margin-bottom: 2rem; }
+    .code-block {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+      padding: 2rem; flex: 2 1 400px; min-width: 280px;
+    }
+    .code-block h2 { margin: 0 0 1rem; font-size: 1.2rem; color: var(--accent); }
+    pre {
+      margin: 0; overflow-x: auto; font-family: "Consolas", "Courier New", monospace;
+      font-size: .85rem; line-height: 1.6; color: var(--text); white-space: pre;
+    }
+
+    /* CNC controller-screen look for the NC code */
+    .cnc {
+      max-width: 620px; border: 3px solid #0d2b5e; border-radius: 12px;
+      background: #66b2ff; overflow: hidden;
+      font-family: "Consolas", "Lucida Console", "Courier New", monospace;
+    }
+    .cnc-head {
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+      background: #0d2b5e; color: #fff; font-weight: 700; font-size: .85rem;
+      letter-spacing: .04em; padding: .3rem .8rem;
+    }
+    .cnc-head span:last-child { justify-self: end; }
+    .cnc-body {
+      margin: 0; padding: .6rem .8rem .9rem; max-height: 34rem; overflow: auto;
+      color: #000; font-weight: 700; font-size: .95rem; line-height: 1.4;
+      scrollbar-color: #0d2b5e #66b2ff;
+    }
+    .cnc-body .ln::after { content: " ;"; }   /* end-of-block mark, not part of copied text */
+    .cnc-body .ln.cur { background: #000; color: #fff; }
+    .checklist-block {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+      padding: 2rem; flex: 1 1 280px; min-width: 260px;
+    }
+    .checklist-block h2 { margin: 0 0 1rem; font-size: 1.2rem; color: var(--accent); }
+    ol.checks { margin: 0; padding: 0; list-style: none; counter-reset: chk; }
+    ol.checks li { display: flex; align-items: flex-start; gap: .6rem; padding: .45rem 0;
+      border-bottom: 1px solid var(--line); counter-increment: chk; }
+    ol.checks li:last-child { border-bottom: none; }
+    ol.checks li::before { content: counter(chk); min-width: 1.4rem; font-size: .8rem;
+      color: var(--muted); padding-top: .15rem; flex-shrink: 0; }
+    ol.checks label { display: flex; align-items: flex-start; gap: .5rem; cursor: pointer; flex: 1; }
+    ol.checks input[type="checkbox"] { width: 1rem; height: 1rem; margin-top: .2rem;
+      flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+    ol.checks span { font-size: .9rem; line-height: 1.4; }
+
+    /* Code and checklist: equal width and equal height */
+    .code-row { align-items: stretch; }
+    .code-block, .checklist-block { flex: 1 1 360px; min-width: 280px; }
+    .code-block { display: flex; flex-direction: column; }
+    .cnc { flex: 1 1 auto; display: flex; flex-direction: column; max-width: none; min-height: 0; }
+    .cnc-body { flex: 1 1 0; min-height: 22rem; max-height: none; }
+
+    /* Space above code + checklist row, and strike-through for ticked items */
+    .code-row { margin-top: 2.5rem; }
+    ol.checks input[type="checkbox"]:checked + span {
+      text-decoration: line-through; text-decoration-thickness: 2px; color: var(--muted);
+    }
+  </style>  <style>
+    :root {
+      --bg: #f5f6f7; --surface: #ffffff; --text: #1d2327;
+      --muted: #5b6770; --line: #d5dade; --accent: #1f4e79; --head-bg: #e6edf3;
+      --sheet: #ffffff; --band: #d9d9d9; --head: #f2f2f2; --title: #2f7aa8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14181b; --surface: #1c2125; --text: #e6e9eb;
+        --muted: #9aa5ad; --line: #333b41; --accent: #7fb2e0; --head-bg: #232a30;
+        --sheet: #1c2125; --band: #2b3238; --head: #232a30; --title: #7fb2e0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 2rem 1rem; background: var(--bg); color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.55; }
+    h1 { margin: 0 0 1rem; font-size: 1.7rem; color: var(--accent); }
+    .viewers { display: flex; gap: 1rem; align-items: stretch; flex-wrap: wrap; margin-bottom: 2rem; }
+    .viewers iframe { flex: 1 1 45%; min-width: 280px; height: 75vh; border: none; }
+    .layout { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; width: 100%; margin-bottom: 2rem; }
+    main { background: var(--surface); border: 1px solid var(--line);
+      border-radius: 6px; padding: 2rem; flex: 1 1 420px; min-width: 280px; }
+    .intro { margin: 0 0 1.5rem; color: var(--muted); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; vertical-align: top; padding: .7rem .9rem; border: 1px solid var(--line); }
+    thead th { background: var(--head-bg); }
+    tbody th { font-weight: 600; width: 38%; }
+    footer { margin-top: 1.25rem; font-size: .9rem; color: var(--muted); }
+	 .sheet {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--sheet);
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid var(--line); padding: 5px 8px; vertical-align: middle; }
+  .top td { height: 30px; }
+  .top .logo { width: 22%; height: 78px; color: var(--muted); text-align: center; font-size: 12px; }
+  .top .logo img { max-height: 60px; max-width: 100%; width: auto; display: inline-block; }
+  .top .title { text-align: center; color: var(--title); font-size: 18px; font-weight: 400; }
+  .top .title img { width: 100%; height: 60px; object-fit: contain; display: block; }
+  .lbl { font-weight: 700; }
+  .val { text-align: center; font-weight: 700; }
+  .band { height: 14px; background: var(--band); padding: 0; }
+  .ops { margin-top: 0; }
+  .ops thead th { background: var(--head); font-weight: 700; text-align: center; }
+  .ops td { text-align: center; white-space: nowrap;}
+  .ops td.l { text-align: left; }
+  .ops .rem { text-align: left; width: 20%; font-size: 12px; }
+  .total td { border: 1px solid var(--line); }
+  .total .gap { border: none; }
+  .total .tl { text-align: right; font-weight: 700; }
+  .total .tv { text-align: center; font-weight: 700; }
+  .note { margin-top: 1.6rem; }
+  .note td { height: 90px; vertical-align: top; }
+  .note .nh { font-weight: 700; }
+  .note p { margin: .25rem 0 0; }
+  .sign { margin-top: 0; }
+  .sign th { background: var(--band); text-align: center; font-weight: 700; width: 50%; }
+  .sign td { height: 34px; }
+  .page { text-align: right; font-size: 11px; margin-top: .4rem; color: var(--muted); }
+  @media print {
+    body { background: #fff; color: #000; padding: 0; }
+    .sheet { padding: 0; max-width: none; background: #fff; }
+    :root { --line: #6f6f6f; --band: #d9d9d9; --head: #f2f2f2; --title: #2f7aa8; --muted: #6b6b6b; }
+  }
+    .code-row { display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap; margin-bottom: 2rem; }
+    .code-block {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+      padding: 2rem; flex: 2 1 400px; min-width: 280px;
+    }
+    .code-block h2 { margin: 0 0 1rem; font-size: 1.2rem; color: var(--accent); }
+    pre {
+      margin: 0; overflow-x: auto; font-family: "Consolas", "Courier New", monospace;
+      font-size: .85rem; line-height: 1.6; color: var(--text); white-space: pre;
+    }
+
+    /* CNC controller-screen look for the NC code */
+    .cnc {
+      max-width: 620px; border: 3px solid #0d2b5e; border-radius: 12px;
+      background: #66b2ff; overflow: hidden;
+      font-family: "Consolas", "Lucida Console", "Courier New", monospace;
+    }
+    .cnc-head {
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+      background: #0d2b5e; color: #fff; font-weight: 700; font-size: .85rem;
+      letter-spacing: .04em; padding: .3rem .8rem;
+    }
+    .cnc-head span:last-child { justify-self: end; }
+    .cnc-body {
+      margin: 0; padding: .6rem .8rem .9rem; max-height: 34rem; overflow: auto;
+      color: #000; font-weight: 700; font-size: .95rem; line-height: 1.4;
+      scrollbar-color: #0d2b5e #66b2ff;
+    }
+    .cnc-body .ln::after { content: " ;"; }   /* end-of-block mark, not part of copied text */
+    .cnc-body .ln.cur { background: #000; color: #fff; }
+    .checklist-block {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+      padding: 2rem; flex: 1 1 280px; min-width: 260px;
+    }
+    .checklist-block h2 { margin: 0 0 1rem; font-size: 1.2rem; color: var(--accent); }
+    ol.checks { margin: 0; padding: 0; list-style: none; counter-reset: chk; }
+    ol.checks li { display: flex; align-items: flex-start; gap: .6rem; padding: .45rem 0;
+      border-bottom: 1px solid var(--line); counter-increment: chk; }
+    ol.checks li:last-child { border-bottom: none; }
+    ol.checks li::before { content: counter(chk); min-width: 1.4rem; font-size: .8rem;
+      color: var(--muted); padding-top: .15rem; flex-shrink: 0; }
+    ol.checks label { display: flex; align-items: flex-start; gap: .5rem; cursor: pointer; flex: 1; }
+    ol.checks input[type="checkbox"] { width: 1rem; height: 1rem; margin-top: .2rem;
+      flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+    ol.checks span { font-size: .9rem; line-height: 1.4; }
+
+    /* Code and checklist: equal width and equal height */
+    .code-row { align-items: stretch; }
+    .code-block, .checklist-block { flex: 1 1 360px; min-width: 280px; }
+    .code-block { display: flex; flex-direction: column; }
+    .cnc { flex: 1 1 auto; display: flex; flex-direction: column; max-width: none; min-height: 0; }
+    .cnc-body { flex: 1 1 0; min-height: 22rem; max-height: none; }
+
+    /* Space above code + checklist row, and strike-through for ticked items */
+    .code-row { margin-top: 2.5rem; }
+    ol.checks input[type="checkbox"]:checked + span {
+      text-decoration: line-through; text-decoration-thickness: 2px; color: var(--muted);
+    }
+  
+    /* Slutkontrollrapport from rapport folder */
+    .inspection-block {
+      --insp-paper: #fff; --insp-ink: #111; --insp-muted: #555; --insp-line: #999;
+      --insp-head: #231f20; --insp-label: #8c8c8c; --insp-field: #d4d4d4; --insp-cell: #ebebeb;
+      margin-top: 2rem; color: var(--insp-ink); font-family: Helvetica, Arial, sans-serif; font-size: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      .inspection-block {
+        --insp-paper: #222; --insp-ink: #eee; --insp-muted: #aaa; --insp-line: #666;
+        --insp-head: #0c0c0c; --insp-label: #555; --insp-field: #3a3a3a; --insp-cell: #2e2e2e;
+      }
+    }
+    .inspection-block .sheet { max-width: none; margin: 0; background: var(--insp-paper); box-shadow: 0 1px 6px rgba(0,0,0,.2); border-radius: 6px; overflow: hidden; }
+    .inspection-block header { background: var(--insp-head); color: #fff; padding: 22px 28px; }
+    .inspection-block header h1 { margin: 0; font-size: clamp(20px,4vw,30px); font-style: italic; font-weight: 800; letter-spacing: .5px; color: #fff; }
+    .inspection-block .fields { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+    .inspection-block .lbl { background: var(--insp-label); color: #fff; font-weight: 700; font-size: 12px; text-align: center; padding: 5px; border-left: 2px solid var(--insp-paper); width: auto; }
+    .inspection-block .val { background: var(--insp-field); min-height: 30px; text-align: center; padding: 6px; border-left: 2px solid var(--insp-paper); font-size: 13px; }
+    .inspection-block .tol { display: flex; flex-wrap: wrap; margin: 14px 20px; border: 1px solid var(--insp-head); font-size: 12px; }
+    .inspection-block .tol b { background: var(--insp-head); color: #fff; padding: 6px 12px; font-style: italic; white-space: nowrap; }
+    .inspection-block .tol span { padding: 6px 12px; }
+    .inspection-block .scroll { overflow-x: auto; padding: 0 20px; }
+    .inspection-block table { border-collapse: collapse; width: 100%; min-width: 880px; }
+    .inspection-block th, .inspection-block td { border: 1px solid var(--insp-line); padding: 0 8px; height: 34px; text-align: center; font-size: 13px; vertical-align: middle; }
+    .inspection-block thead th { background: var(--insp-cell); font-size: 11px; height: 30px; }
+    .inspection-block thead th.insp { background: var(--insp-head); color: #fff; }
+    .inspection-block tr.hint td { border: 0; height: 20px; font-size: 10px; font-style: italic; color: var(--insp-muted); }
+    .inspection-block td.ins { background: var(--insp-cell); }
+    .inspection-block td.nr { width: 70px; }
+    .inspection-block td.req { text-align: left; min-width: 250px; }
+    .inspection-block td.notes { text-align: left; vertical-align: top; height: 90px; padding: 8px 10px; line-height: 1.5; }
+    .inspection-block td.notes strong { display: block; font-size: 12px; letter-spacing: .4px; }
+    .inspection-block .rule { border-top: 3px solid var(--insp-head); margin: 26px 20px 0; }
+    .inspection-block .cert { font-style: italic; font-size: 13px; margin: 12px 20px 0; }
+    .inspection-block .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding: 36px 20px 28px; margin-top: 0; }
+    .inspection-block .sign div { display: grid; grid-template-columns: 1fr 110px; gap: 16px; }
+    .inspection-block .sign span { border-top: 1px solid var(--insp-ink); padding-top: 4px; font-size: 11px; }
+    .inspection-block .sign th, .inspection-block .sign td { border: none; height: auto; }
+    @media (max-width: 700px) {
+      .inspection-block .fields { grid-template-columns: 1fr; }
+      .inspection-block .sign { grid-template-columns: 1fr; gap: 28px; }
+    }
+    /* Breadcrumb: home + incremental 200-** */
+    .crumb {
+      display: flex; align-items: center; gap: .45rem; flex-wrap: wrap;
+      margin: 0 0 1.1rem; font-size: .95rem; color: var(--muted);
+    }
+    .crumb a.crumb-home {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 2rem; height: 2rem; color: var(--accent); text-decoration: none;
+      border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
+    }
+    .crumb a.crumb-home:hover { background: var(--head-bg); }
+    .crumb a.crumb-home svg { width: 1.15rem; height: 1.15rem; display: block; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .crumb .crumb-sep { color: var(--muted); font-weight: 500; user-select: none; }
+    .crumb a.crumb-item { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .crumb a.crumb-item:hover { text-decoration: underline; }
+    .crumb .crumb-current { color: var(--text); font-weight: 700; }
+    @media print { .crumb { display: none; } }</style>
+</head>
+<body>
+      <!-- CRUMB -->
+  <nav class="crumb" aria-label="Nav">
+    <a class="crumb-home" href="../index.html" title="Hem" aria-label="Hem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-7h5v7"/></svg></a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-01/200-01.html">200-01</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <span class="crumb-current" aria-current="page">200-02</span>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-03/200-03.html">200-03</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-04/200-04.html">200-04</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-05/200-05.html">200-05</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-06/200-06.html">200-06</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-07/200-07.html">200-07</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-08/200-08.html">200-08</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-09/200-09.html">200-09</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-10/200-10.html">200-10</a>
+    <span class="crumb-sep" aria-hidden="true">&gt;</span>
+    <a class="crumb-item" href="../200-11/200-11.html">200-11</a>
+  </nav>
+  <!-- /CRUMB -->
+
+  <h1>200-02</h1>
+  <div class="viewers">
+    <iframe src="200-02 Drawing.pdf" title="200-02 Drawing"></iframe>
+    <iframe src="https://yaelev74.autodesk360.com/shares/public/SH90d2dQT28d5b602811c1fdbc146d83b309?mode=embed" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+  </div>
+  <div class="layout">
+    <main>
+      <h1>Uppspänning</h1>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Uppspänning</th><th scope="col"></th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Chuck</th><td>Hydrauliskt 3-backschuck (självcentrerande), Ø 160 mm</td></tr>
+            <tr><th scope="row">Backar</th><td>Mjuka backar</td></tr>
+            <tr><th scope="row">Spänndiameter</th><td>Ø50 mm (obearbetad råstång)</td></tr>
+            <tr><th scope="row">Utstick</th><td>Ca 45 mm från backarnas framkant</td></tr>
+            <tr><th scope="row">Spännkraft / tryck</th><td>17–28 bar</td></tr>
+            <tr><th scope="row">Arbetskoordinat</th><td>G54</td></tr>
+            <tr><th scope="row">Nollpunkt</th><td>X0 i centrumlinjen, Z0 på den planade framsidan</td></tr>
+            <tr><th scope="row">Startposition</th><td>X54, Z2 före plansvarvning. Verktygsbyte vid G53 X0, G53 Z0.</td></tr>
+            <tr><th scope="row">Kylmedel</th><td>Vattenblandbar emulsion, 6–8 %</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+    <main>
+      <h1>Materialval – SS 1914 (11SMnPb30+C)</h1>
+      <p class="intro">Blylegerat friskärande automatstål, standardiserat enligt SS-EN 10277-3. Ej ett seghärdningsstål – hållfasthet och hårdhet uppnås via kalldragning, ej genom härdning och anlöpning.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Egenskap</th><th>Värde (11SMnPb30+C, SS 1914)</th></tr></thead>
+          <tbody>
+            <tr><th>Materialgrupp</th><td>4 (automatstål, fri-skärande, blylegerat)</td></tr>
+            <tr><th>Kemisk sammansättning (ca)</th><td>C &lt; 0,14 %, Si &lt; 0,05 %, Mn 0,90–1,30 %, P max 0,11 %, S 0,270–0,330 %, Pb 0,20–0,35 %</td></tr>
+            <tr><th>Leveranstillstånd</th><td>Kalldraget (+C)</td></tr>
+            <tr><th>Sträckgräns Re min</th><td>245–440 MPa</td></tr>
+            <tr><th>Brottgräns Rm (kalldraget)</th><td>360–810 MPa</td></tr>
+            <tr><th>Brottförlängning A5 min</th><td>6–9 %</td></tr>
+            <tr><th>Hårdhet (kalldraget)</th><td>ca 140–220 HB</td></tr>
+            <tr><th>Härdning (vid behov)</th><td>Lämpar sig för induktions- eller flamhärdning; ythårdhet ca 52–60 HRC. Ej lämpligt för svetsning utan förvärmning.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer>Källa: Verkstadshandboken.</footer>
+    </main>
+  </div>
+    <div class="sheet">
+
+  <table class="top">
+    <tr>
+      <td class="logo" rowspan="2" colspan="2"><img src="../YA_LOGO.png" alt="YA"></td>
+      <td class="title" rowspan="2" colspan="2">
+		<img src="../Mastercam-Logo.jpg" alt="Mastercam">
+		</td>
+      <td class="lbl" colspan="2">ARBETSSTYCKE STORLEK</td>
+      <td class="val" colspan="2">OD 50 × L 81 mm, Z 1,0</td>
+    </tr>
+    <tr>
+      <td class="lbl" colspan="2">OPERATION NR</td>
+      <td class="val" colspan="2">OP10 (program 200-01.NC)</td>
+    </tr>
+    <tr>
+      <td class="lbl">MASKIN</td>
+      <td class="val" colspan="3">HAAS ST-10 Svarv</td>
+      <td class="lbl">MATERIAL</td>
+      <td class="val" colspan="1">SS 1914 (11SMnPb30+C)</td>
+      <td class="lbl">PROGRAMMERARE</td>
+      <td class="val">Ihor Posunko</td>
+    </tr>
+    <tr>
+      <td class="lbl">PROJEKTNAMN</td>
+      <td class="val" colspan="3">Axel 01</td>
+      <td class="lbl">RITNINGSNR</td>
+      <td class="val">200-01</td>
+      <td class="lbl">SKIFT / OPERATÖR</td>
+      <td class="val"></td>
+    </tr>
+    <tr><td class="band" colspan="8"></td></tr>
+  </table>
+
+  <table class="ops">
+    <thead>
+      <tr>
+        <th rowspan="2">Op nr</th>
+        <th rowspan="2">Operation</th>
+        <th rowspan="2">Verktygs-<br>specifikation</th>
+        <th rowspan="2">Vkt<br>nr</th>
+        <th colspan="3">Verktygsgeometri</th>
+        <th rowspan="2">Hållare</th>
+        <th rowspan="2">Skärhastighet<br>vc (m/min)</th>
+        <th rowspan="2">Matning<br>fn (mm/varv)</th>
+        <th rowspan="2">Skärdjup<br>ap (mm)</th>
+        <th rowspan="2">Tid<br>h:mm:ss</th>
+        <th rowspan="2">Anmärkningar</th>
+      </tr>
+      <tr>
+        <th>CR</th>
+        <th>Bredd</th>
+        <th>OH</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td class="l">PLANSVARVNING</td>
+        <td>DNMG150604 PF-4425</td>
+        <td>T2</td>
+        <td>0,4</td>
+        <td>20,0</td>
+        <td>125,8</td>
+        <td>DDJNR 2020K 15</td>
+        <td>200</td>
+        <td>0,15</td>
+        <td>1,0</td>
+        <td>0:00:09</td>
+        <td class="rem">Kompensation vänster.</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td class="l">GROVBEARBETNINGSCYKEL</td>
+        <td>DNMG150604 PF-4425</td>
+        <td>T2</td>
+        <td>0,4</td>
+        <td>20,0</td>
+        <td>125,8</td>
+        <td>DDJNR 2020K 15</td>
+        <td>200</td>
+        <td>0,20</td>
+        <td>1,48</td>
+        <td>0:04:21</td>
+        <td class="rem">Tillägg 0,2 mm.</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td class="l">FINBEARBETNINGSCYKEL</td>
+        <td>VBMT 160404-PF 4425</td>
+        <td>T3</td>
+        <td>0,4</td>
+        <td>20,0</td>
+        <td>127,2</td>
+        <td>SVJBR 2020K 16</td>
+        <td>300</td>
+        <td>0,035</td>
+        <td>0,2</td>
+        <td>0:00:42</td>
+        <td class="rem">Slitagekompensation höger (G42).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="total">
+    <tr>
+      <td class="gap" style="width:62%"></td>
+      <td class="tl" style="width:24%">Total tid h : min : sek</td>
+      <td class="tv">0:05:22</td>
+    </tr>
+  </table>
+
+  <table class="note">
+    <tr>
+      <td class="nh">Notering:
+      </td>
+    </tr>
+  </table>
+
+  <table class="sign">
+    <tr><th>UPPRÄTTAD AV</th><th>GODKÄND AV</th></tr>
+    <tr><td></td><td></td></tr>
+  </table>
+</div>
+  <div class="code-row">
+    <div class="code-block">
+      <h2>NC-program – 200-02.NC</h2>
+      <div class="cnc" role="region" aria-label="NC-program O0000">
+        <div class="cnc-head"><span>MEM</span><span>O0000</span><span>N00000001</span></div>
+        <pre class="cnc-body"><span class="ln">%</span>
+<span class="ln cur">O0000</span>
+<span class="ln">(200-02)</span>
+<span class="ln">(DATE=DD-MM-YY - 03-10-26 TIME=HH:MM - 15:54)</span>
+<span class="ln">(MCAM FILE - C:\USERS\IHORP\DESKTOP\CNC SVARV\200-02\200-02.MCAM)</span>
+<span class="ln">(NC FILE - C:\USERS\IHORP\DESKTOP\CNC SVARV\200-02\200-02.NC)</span>
+<span class="ln">(MATERIAL - STEEL MM - P20 - 175 BHN)</span>
+<span class="ln">G21</span>
+<span class="ln">(TOOL - 2 OFFSET - 2)</span>
+<span class="ln">(DNMG 150604 PF 4425  INSERT - T-MAX® P, INSERT FOR TURNING)</span>
+<span class="ln">G00 T0202</span>
+<span class="ln">M8</span>
+<span class="ln">G97 S860 M3</span>
+<span class="ln">G54</span>
+<span class="ln">G50 S4800</span>
+<span class="ln">G96 S200</span>
+<span class="ln">G00 Z0.</span>
+<span class="ln">X74.</span>
+<span class="ln">G99 G01 X-.794 F.15</span>
+<span class="ln">G00 Z2.</span>
+<span class="ln">G50 S2500</span>
+<span class="ln">X72.</span>
+<span class="ln">Z2.414</span>
+<span class="ln">G71 P100 Q110 U.8 W.2 D1.5 F.15</span>
+<span class="ln">N100 G00 G42 X21.172 S300</span>
+<span class="ln">G01 Z1.182 F.05</span>
+<span class="ln">X29.768 Z-3.116</span>
+<span class="ln">G03 X30. Z-3.397 R.397</span>
+<span class="ln">G01 Z-47.</span>
+<span class="ln">X49.206</span>
+<span class="ln">G03 X49.768 Z-47.116 R.397</span>
+<span class="ln">G01 X59.768 Z-52.116</span>
+<span class="ln">G03 X60. Z-52.397 R.397</span>
+<span class="ln">G01 Z-62.</span>
+<span class="ln">N110 G40 X72.</span>
+<span class="ln">G00 Z2.414</span>
+<span class="ln">M9</span>
+<span class="ln">G28 U0 W0</span>
+<span class="ln">M01</span>
+<span class="ln">(TOOL - 3 OFFSET - 3)</span>
+<span class="ln">(VBMT 16 04 04-PF 4425  INSERT - COROTURN® 107, INSERT FOR TURNING)</span>
+<span class="ln">G00 T0303</span>
+<span class="ln">M8</span>
+<span class="ln">G97 S1326 M3</span>
+<span class="ln">G54</span>
+<span class="ln">G50 S3500</span>
+<span class="ln">G96 S300</span>
+<span class="ln">G00 Z2.414</span>
+<span class="ln">X72.</span>
+<span class="ln">G70 P100 Q110</span>
+<span class="ln">G00 Z2.414</span>
+<span class="ln">M9</span>
+<span class="ln">M5</span>
+<span class="ln">G28 U0 W0</span>
+<span class="ln">M30</span>
+<span class="ln">%</span></pre>
+      </div>
+
+    </div>
+
+    <div class="checklist-block">
+      <h2>Checklista</h2>
+      <ol class="checks">
+        <li><label><input type="checkbox"><span>Följ säkerhetsföreskrifterna</span></label></li>
+        <li><label><input type="checkbox"><span>Simulera CAM-programmet / postprocessad kod</span></label></li>
+        <li><label><input type="checkbox"><span>Överför det kodade programmet till CNC-maskinen</span></label></li>
+        <li><label><input type="checkbox"><span>Montera och förbered chucken</span></label></li>
+        <li><label><input type="checkbox"><span>Ställ in spänntryck för chuck</span></label></li>
+        <li><label><input type="checkbox"><span>Mata ut materialet till dokumenterad längd / spänn fast materialet</span></label></li>
+        <li><label><input type="checkbox"><span>Montera verktyg enligt uppställningsbladet (montera skär)</span></label></li>
+        <li><label><input type="checkbox"><span>Mät in verktygen och indikera borrarna</span></label></li>
+        <li><label><input type="checkbox"><span>Ställ in nollpunktsförskjutning G54/Z0 i maskinen</span></label></li>
+        <li><label><input type="checkbox"><span>Justera kylmedelsslangarna för optimalt flöde</span></label></li>
+        <li><label><input type="checkbox"><span>Simulera programmet i maskinen</span></label></li>
+        <li><label><input type="checkbox"><span>Torrkör detaljen med 155 mm positiv Z-förskjutning och reducerad snabbtransport och matning</span></label></li>
+        <li><label><input type="checkbox"><span>Verifiera och dubbelkontrollera hela processen</span></label></li>
+        <li><label><input type="checkbox"><span>Kör programmet med valfritt stopp (optional stop) och reducerad snabbtransport</span></label></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- INSP:200-02 -->
+  <section class="inspection-block" id="slutkontrollrapport">
+<div class="sheet">
+<header><h1>SLUTKONTROLLRAPPORT</h1></header>
+<div class="fields">
+<div><div class="lbl">OPERATÖRENS NAMN</div><div class="val"></div></div>
+<div><div class="lbl">DELNR / REV</div><div class="val">200-02 / –</div></div>
+<div><div class="lbl">KONTROLLANT</div><div class="val"></div></div>
+</div>
+<div class="tol"><b>TOLERANSBLOCK</b><span>ISO 2768-1-m: 3–6 ±0,1 | 6–30 ±0,2 | 30–120 ±0,3</span><span>ISO 2768-1-c (fas/radie): 0,5–3 ±0,2 | 3–6 ±0,5 | över 6 ±1</span></div>
+<div class="scroll">
+<table>
+<tr class="hint"><td colspan="6"></td><td colspan="2">(ENDAST KONTROLLANT)</td></tr>
+<thead><tr><th>MÅTT NR</th><th>KRAV</th><th>OPERATÖRENS UTFALL</th><th>VERKTYG</th><th>KONTROLLANTENS UTFALL</th><th>VERKTYG</th><th class="insp">GODKÄND</th><th class="insp">UNDERKÄND</th></tr></thead>
+<tbody>
+<tr><td class="nr">1</td><td class="req">Ø30 ±0,2</td><td></td><td>Mikrometer 25–50</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">2</td><td class="req">Ø60 ±0,3</td><td></td><td>Mikrometer 50–75</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">3</td><td class="req">Ø70 ±0,3</td><td></td><td>Mikrometer 50–75</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">4</td><td class="req">47 ±0,3 (längd Ø30)</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">5</td><td class="req">62 ±0,3 (från ände till Ø70)</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">6</td><td class="req">102 ±0,3 (totallängd)</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">7</td><td class="req">15 ±0,2 (längd Ø60, beräknad)</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">8</td><td class="req">40 ±0,3 (längd Ø70, beräknad)</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">9</td><td class="req">3x45° ±0,2 (fas)</td><td></td><td>Fasmall</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">10</td><td class="req">5x45° ±0,5 (fas)</td><td></td><td>Fasmall</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">11</td><td class="req">Ra 3,2 (yta Ø30)</td><td></td><td>Ytjämnhetsprov</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">12</td><td class="req">Rundgång 0,1 A (Ø70)</td><td></td><td>Mätklocka</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="notes" colspan="8"><strong>ANTECKNINGAR</strong>Material 11SMnPb30 · Ritning 200-02 · Benämning: Axel</td></tr>
+</tbody>
+</table>
+</div>
+<div class="rule"></div>
+<p class="cert">Jag har kontrollerat ovan nämnda del och intygar att måtten är korrekta.</p>
+<div class="sign">
+<div><span><b>SIGNATUR:</b> OPERATÖR</span><span><b>DATUM:</b></span></div>
+<div><span><b>SIGNATUR:</b> KONTROLLANT</span><span><b>DATUM:</b></span></div>
+</div>
+</div>
+  </section>
+  <!-- /INSP:200-02 -->
+</body>
+</html>

@@ -1,0 +1,248 @@
+* {
+    box-sizing: border-box;
+}
+
+/* ----------- 2020 styles -------------- */
+body{
+    font-family: calibri, arial, sans;
+    font-size: 1.25vw;
+}
+
+.HEADER {
+    width: 100%;
+    margin-bottom: 1em;
+    border: 1px solid;
+    border-radius: 1em;
+    display: grid;
+    grid-template-columns: 60% 40%;
+    grid-gap: 0;
+    grid-auto-rows: minmax(0, auto);
+}
+
+
+.HEADER .HEADSCREENSHOT {
+	 border-radius: 1em 0 0 1em;
+   grid-column: 1;
+   grid-row: 1 / span 3;
+   position:relative;
+	 background-position: 50% 50%;
+	 background-repeat: no-repeat;
+	 background-size: contain;
+   overflow: hidden;
+}
+
+.HEADER .HEADSCREENSHOT > img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    position: absolute;  
+    top: 0;  
+    bottom: 0;  
+    left: 0;  
+    right: 0;  
+    margin: auto;
+	  opacity: 0;
+}
+
+
+
+.HEADER .LOGO {
+    grid-column: 2;
+    grid-row: 1 / span 1;
+    text-align: right;
+}
+
+.HEADER .LOGO > img {
+    padding:0.5em;
+    max-width: 100%;
+}
+
+.HEADER .HEADINFOTEXT {
+    grid-column: 2;
+    grid-row: 2 / span 1;
+    margin:5px;
+}
+
+.HEADINFOTEXT_TABLE {
+    width: 100%;
+    float: right;
+    border-collapse: collapse;
+}
+
+.HEADER .HEADINFOTEXT_TABLE td {
+    border-bottom: 1px solid;
+}
+
+.HEADER .HEADINFOTEXT_TABLE td:nth-child(odd) {
+    font-weight: bold;
+}
+
+.HEADER .HEADINFOTEXT_TABLE td:empty {
+    margin:0;
+    padding:0;
+    border: none;
+}
+
+.HEADER .COMMENT {
+		margin:5px;
+    grid-column: 2;
+    grid-row: 3 / span 1;
+}
+.HEADER .COMMENT_NAME{
+   font-weight: bold;
+   border-bottom: 1px solid;
+}
+.HEADER .COMMENT p {
+	margin:0;
+}
+
+/* ----------- 2019 styles ---------- */
+.PAGE  .HEADSCREENSHOT{
+	display:inline-block;
+	float: left;
+}
+
+.PAGE  .LOGO{
+	float:right;
+}
+
+.PAGE  .LOGO img
+{
+	border:none;
+	max-width:200px;
+
+}
+
+.PAGE  .HEADINFOTEXT{
+	clear:right;
+	background-color:white;
+	float:right;
+	padding-top:20px;
+	max-width:50%;
+}
+
+.PAGE  .HEADSCREENSHOT{
+	max-width:50%;
+}
+.PAGE  .HEADSCREENSHOT img{
+	max-width:100%;
+}
+
+
+/* header cells <td> - general format */
+.PAGE .HEADINFOTEXT_TABLE td
+{
+	border:solid 1px;
+	padding-left:5px;
+	padding-right:5px;
+}
+
+/* header table <table> - general format */
+.PAGE .HEADINFOTEXT .HEADINFOTEXT_TABLE {
+	display:inline-table;
+	font: 1.25em Arial;
+	border-collapse:collapse;
+	empty-cells:hide;
+}
+
+/* empty header cells <td> - general format */
+.PAGE .HEADINFOTEXT .HEADINFOTEXT_TABLE td:empty
+{
+	border:none;
+}
+
+
+
+
+
+/* content container <div> - general format */
+.CONTENT{
+	padding-top:10px;
+}
+.CONTENT img
+{
+	max-width:100px;
+	max-height:100px;
+}
+
+
+/* table content <table> - general table format of content */
+.CONTENT_TABLE{
+	width:100%;
+	font: 12px Arial;
+	text-align: left;
+	margin-right:5px;
+	margin-bottom:5px;
+	border:1px solid black;
+    border-spacing: 0px;
+    border-collapse: collapse;
+}
+
+
+/* content caption - default text */
+.CONTENT_TABLE caption:before
+{
+	/* content:"gmccs.de - CAD/CAM L?gen";*/
+}
+
+/* content caption - align at bottom */
+.CONTENT_TABLE caption
+{
+	font: 14px Arial;
+	font-weight:bold;
+	padding:5px;
+}
+
+
+/* content cell <td> - general format of content cells */
+.CONTENT_TABLE td{
+	padding:0 3px;
+	border:1px solid black;
+}
+
+/* content head <th> - column heading */
+.CONTENT_TABLE th{
+	text-align: center;
+	padding:0 3px;
+	border:1px solid black;
+}
+
+/* foot note <tfoot> - overall cycle time */
+.CONTENT_TABLE tfoot{
+	text-align:center;
+	font-weight:bold;
+}
+
+/* content column <td> - center numbers */
+.td_72,
+.td_40,
+.td_80,
+.td_37,
+.td_38,
+.td_24,
+.td_62,
+.td_74,
+.td_35,
+.td_36,
+.td_37,
+.td_47,
+.td_63,
+.td_60,
+.td_81,
+.td_112,
+.td_102,
+.td_114,
+.td_120
+{
+	text-align:center;
+}
+
+.CONTENT_TABLE_BODY tr:nth-child(odd) {background: #EEE;}
+
+
+
+.td_72:before
+{
+	content:"T";
+}

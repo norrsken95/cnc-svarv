@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slutkontrollrapport 200-10</title>
+<style>
+:root{--bg:#f2f2f2;--paper:#fff;--ink:#111;--muted:#555;--line:#999;--head:#231f20;--label:#8c8c8c;--field:#d4d4d4;--cell:#ebebeb}
+@media (prefers-color-scheme:dark){:root{--bg:#161616;--paper:#222;--ink:#eee;--muted:#aaa;--line:#666;--head:#0c0c0c;--label:#555;--field:#3a3a3a;--cell:#2e2e2e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Helvetica,Arial,sans-serif;font-size:14px}
+.sheet{max-width:1100px;margin:16px auto;background:var(--paper);box-shadow:0 1px 6px rgba(0,0,0,.2)}
+header{background:var(--head);color:#fff;padding:22px 28px}
+header h1{margin:0;font-size:clamp(20px,4vw,30px);font-style:italic;font-weight:800;letter-spacing:.5px}
+.fields{display:grid;grid-template-columns:1fr 1fr 1fr}
+.lbl{background:var(--label);color:#fff;font-weight:700;font-size:12px;text-align:center;padding:5px;border-left:2px solid var(--paper)}
+.val{background:var(--field);min-height:30px;text-align:center;padding:6px;border-left:2px solid var(--paper);font-size:13px}
+.tol{display:flex;flex-wrap:wrap;margin:14px 20px;border:1px solid var(--head);font-size:12px}
+.tol b{background:var(--head);color:#fff;padding:6px 12px;font-style:italic;white-space:nowrap}
+.tol span{padding:6px 12px}
+.scroll{overflow-x:auto;padding:0 20px}
+table{border-collapse:collapse;width:100%;min-width:880px}
+th,td{border:1px solid var(--line);padding:0 8px;height:34px;text-align:center;font-size:13px}
+thead th{background:var(--cell);font-size:11px;height:30px}
+thead th.insp{background:var(--head);color:#fff}
+tr.hint td{border:0;height:20px;font-size:10px;font-style:italic;color:var(--muted)}
+td.ins{background:var(--cell)}
+td.nr{width:70px}
+td.req{text-align:left;min-width:250px}
+td.notes{text-align:left;vertical-align:top;height:90px;padding:8px 10px;line-height:1.5}
+td.notes strong{display:block;font-size:12px;letter-spacing:.4px}
+.rule{border-top:3px solid var(--head);margin:26px 20px 0}
+.cert{font-style:italic;font-size:13px;margin:12px 20px 0}
+.sign{display:grid;grid-template-columns:1fr 1fr;gap:40px;padding:36px 20px 28px}
+.sign div{display:grid;grid-template-columns:1fr 110px;gap:16px}
+.sign span{border-top:1px solid var(--ink);padding-top:4px;font-size:11px}
+@media (max-width:700px){.fields{grid-template-columns:1fr}.sign{grid-template-columns:1fr;gap:28px}}
+@media print{:root{--bg:#fff;--paper:#fff;--ink:#000;--muted:#555;--line:#999;--head:#231f20;--label:#8c8c8c;--field:#d4d4d4;--cell:#ebebeb}
+body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.sheet{box-shadow:none;margin:0;max-width:none}@page{size:A4 landscape;margin:10mm}}
+</style>
+</head>
+<body>
+<div class="sheet">
+<header><h1>SLUTKONTROLLRAPPORT</h1></header>
+<div class="fields">
+<div><div class="lbl">OPERATÖRENS NAMN</div><div class="val"></div></div>
+<div><div class="lbl">DELNR / REV</div><div class="val">200-10 / –</div></div>
+<div><div class="lbl">KONTROLLANT</div><div class="val"></div></div>
+</div>
+<div class="tol"><b>TOLERANSBLOCK</b><span>ISO 2768-1-m: 3–6 ±0,1 | 6–30 ±0,2 | 30–120 ±0,3</span><span>ISO 2768-1-c (fas/radie): 0,5–3 ±0,2 | 3–6 ±0,5 | över 6 ±1</span></div>
+<div class="scroll">
+<table>
+<tr class="hint"><td colspan="6"></td><td colspan="2">(ENDAST KONTROLLANT)</td></tr>
+<thead><tr><th>MÅTT NR</th><th>KRAV</th><th>OPERATÖRENS UTFALL</th><th>VERKTYG</th><th>KONTROLLANTENS UTFALL</th><th>VERKTYG</th><th class="insp">GODKÄND</th><th class="insp">UNDERKÄND</th></tr></thead>
+<tbody>
+<tr><td class="nr">1</td><td class="req">Ø60 ±0,3</td><td></td><td>Mikrometer 50–75</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">2</td><td class="req">33,07 ±0,3 (vid övergång R15/R25)</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">3</td><td class="req">100 ±0,3 (totallängd)</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">4</td><td class="req">30 ±0,2 (längd Ø60)</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">5</td><td class="req">43,75 ±0,3</td><td></td><td>Skjutmått</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">6</td><td class="req">R25 ±1</td><td></td><td>Radiemall</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">7</td><td class="req">R15 ±1</td><td></td><td>Radiemall</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="nr">8</td><td class="req">Ra 3,2 (sfärisk yta)</td><td></td><td>Ytjämnhetsprov</td><td></td><td></td><td class="ins"></td><td class="ins"></td></tr>
+<tr><td class="notes" colspan="8"><strong>ANTECKNINGAR</strong>Material 11SMnPb30 · Ritning 200-10 · Benämning: Axel</td></tr>
+</tbody>
+</table>
+</div>
+<div class="rule"></div>
+<p class="cert">Jag har kontrollerat ovan nämnda del och intygar att måtten är korrekta.</p>
+<div class="sign">
+<div><span><b>SIGNATUR:</b> OPERATÖR</span><span><b>DATUM:</b></span></div>
+<div><span><b>SIGNATUR:</b> KONTROLLANT</span><span><b>DATUM:</b></span></div>
+</div>
+</div>
+</body>
+</html>

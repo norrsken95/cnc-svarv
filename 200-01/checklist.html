@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checklista – 200-01</title>
+  <style>
+    :root {
+      --bg: #f5f6f7; --surface: #ffffff; --text: #1d2327;
+      --muted: #5b6770; --line: #d5dade; --accent: #1f4e79; --head-bg: #e6edf3;
+      --check: #2a7a4f; --warn: #b07d2f;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14181b; --surface: #1c2125; --text: #e6e9eb;
+        --muted: #9aa5ad; --line: #333b41; --accent: #7fb2e0; --head-bg: #232a30;
+        --check: #4caf7d; --warn: #e0a84f;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 2rem 1rem; background: var(--bg); color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.55; }
+    h1 { margin: 0 0 .25rem; font-size: 1.7rem; color: var(--accent); }
+    .sub { color: var(--muted); margin: 0 0 2rem; font-size: .95rem; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .card h2 { margin: 0 0 1rem; font-size: 1.1rem; color: var(--accent); border-bottom: 1px solid var(--line); padding-bottom: .5rem; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    li { display: flex; align-items: flex-start; gap: .75rem; padding: .45rem 0; border-bottom: 1px solid var(--line); }
+    li:last-child { border-bottom: none; }
+    input[type="checkbox"] { width: 1.1rem; height: 1.1rem; margin-top: .2rem; flex-shrink: 0;
+      accent-color: var(--check); cursor: pointer; }
+    label { cursor: pointer; flex: 1; }
+    .warn label { color: var(--warn); }
+    .progress-wrap { margin-bottom: 2rem; }
+    .progress-label { font-size: .9rem; color: var(--muted); margin-bottom: .4rem; }
+    progress { width: 100%; height: 8px; border-radius: 4px; border: none; }
+    progress::-webkit-progress-bar { background: var(--line); border-radius: 4px; }
+    progress::-webkit-progress-value { background: var(--check); border-radius: 4px; }
+    progress::-moz-progress-bar { background: var(--check); border-radius: 4px; }
+    #progress-text { font-weight: 600; color: var(--check); }
+  </style>
+</head>
+<body>
+  <h1>Checklista – 200-01</h1>
+  <p class="sub">Axel 01 · HAAS ST-10 · SS 1914</p>
+
+  <div class="progress-wrap">
+    <div class="progress-label">Slutförd: <span id="progress-text">0 / 0</span></div>
+    <progress id="progress-bar" value="0" max="1"></progress>
+  </div>
+
+  <div class="card">
+    <h2>Förberedelse</h2>
+    <ul>
+      <li><input type="checkbox" id="c1"><label for="c1">Rita upp ritning 200-01 och kontrollera mått</label></li>
+      <li><input type="checkbox" id="c2"><label for="c2">Kontrollera råmaterial: Ø50 × 85 mm, SS 1914</label></li>
+      <li><input type="checkbox" id="c3"><label for="c3">Ladda NC-program 200-01.NC i styrsystemet</label></li>
+      <li><input type="checkbox" id="c4"><label for="c4">Verifiera att G54-offset är inställd korrekt</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Uppspänning</h2>
+    <ul>
+      <li><input type="checkbox" id="c5"><label for="c5">Montera mjuka backar i Ø160 mm chuck</label></li>
+      <li><input type="checkbox" id="c6"><label for="c6">Spän ämnet Ø50 mm med ca 45 mm utstick</label></li>
+      <li><input type="checkbox" id="c7"><label for="c7">Kontrollera spänntryck 17–28 bar</label></li>
+      <li><input type="checkbox" id="c8"><label for="c8">Nollpunkt: X0 centrum, Z0 planad framsida</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Verktyg</h2>
+    <ul>
+      <li><input type="checkbox" id="c9"><label for="c9">T2 – DDJNR 2020K 15 med DNMG150604 PF-4425 monterad</label></li>
+      <li><input type="checkbox" id="c10"><label for="c10">T3 – SVJBR 2020K 16 med VBMT 160404-PF 4425 monterad</label></li>
+      <li><input type="checkbox" id="c11"><label for="c11">Verktygslängdskompensation inmätt och registrerad</label></li>
+      <li class="warn"><input type="checkbox" id="c12"><label for="c12">⚠ Kontrollera skärskador på insatser före start</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Kylsystem</h2>
+    <ul>
+      <li><input type="checkbox" id="c13"><label for="c13">Emulsion inställd på 6–8 % koncentration</label></li>
+      <li><input type="checkbox" id="c14"><label for="c14">Kylmedelstillförsel riktad mot skärzonen</label></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Provkörning & kontroll</h2>
+    <ul>
+      <li><input type="checkbox" id="c15"><label for="c15">Enkelblock (Single Block) aktiverat vid första körning</label></li>
+      <li><input type="checkbox" id="c16"><label for="c16">Luftkörning (Dry Run) genomförd utan kollision</label></li>
+      <li><input type="checkbox" id="c17"><label for="c17">Mät Ø20h6 efter finsvarvning</label></li>
+      <li><input type="checkbox" id="c18"><label for="c18">Mät Ø30 och längd 40 mm</label></li>
+      <li><input type="checkbox" id="c19"><label for="c19">Kontrollera ytjämnhet Ra ≤ 1,6 µm</label></li>
+      <li class="warn"><input type="checkbox" id="c20"><label for="c20">⚠ Signera mätkort innan serieproduktion</label></li>
+    </ul>
+  </div>
+
+  <script>
+    const checks = document.querySelectorAll('input[type="checkbox"]');
+    const bar = document.getElementById('progress-bar');
+    const txt = document.getElementById('progress-text');
+
+    function update() {
+      const done = [...checks].filter(c => c.checked).length;
+      bar.max = checks.length;
+      bar.value = done;
+      txt.textContent = done + ' / ' + checks.length;
+      localStorage.setItem('checklist-200-01', [...checks].map(c => c.checked ? '1' : '0').join(''));
+    }
+
+    const saved = localStorage.getItem('checklist-200-01');
+    if (saved) checks.forEach((c, i) => c.checked = saved[i] === '1');
+    checks.forEach(c => c.addEventListener('change', update));
+    update();
+  </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+﻿Sunday, October 4, 2026 1:35 PM
+
+Name                  : Plane
+Comment               :
+Coordinate display    : Mill
+Color                 : 1
+Associative type      : None
+Reserved              : No
+Locked                : No
+Linked to             : None
+Plane ID              : 52
+View number           : 5
+Work Offset           : Off
+Origin (world)        : X0. Y0. Z0.
+Origin (view)         : X0. Y0. Z0.
+Matrix                : X0. Y1. Z0.
+                      : X0. Y0. Z1.
+                      : X1. Y0. Z0.
+Transform             : None
+*** Plane Usage ***
+Toolpath operation    : 3 - Lathe Dynamic Rough - [WCS: Top] - [Tplane: Plane]
+     Used in operation Tplane
+     Used in NCI
+Toolpath operation    : 4 - Lathe Finish - [WCS: Top] - [Tplane: Plane]
+     Used in operation Tplane
+     Used in NCI
+Toolpath operation    : 1 - Lathe Face - [WCS: Top] - [Tplane: Plane]
+     Used in operation Tplane
+     Used in NCI

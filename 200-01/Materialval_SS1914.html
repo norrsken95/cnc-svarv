@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Materialval – SS 1914 (11SMnPb30+C)</title>
+<style>
+  :root {
+    --bg: #f5f6f7;
+    --surface: #ffffff;
+    --text: #1d2327;
+    --muted: #5b6770;
+    --line: #d5dade;
+    --accent: #1f4e79;
+    --head-bg: #e6edf3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14181b;
+      --surface: #1c2125;
+      --text: #e6e9eb;
+      --muted: #9aa5ad;
+      --line: #333b41;
+      --accent: #7fb2e0;
+      --head-bg: #232a30;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem 1rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.55;
+  }
+  main {
+    max-width: 52rem;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 2rem;
+  }
+  h1 {
+    margin: 0 0 .5rem;
+    font-size: 1.7rem;
+    line-height: 1.25;
+    color: var(--accent);
+  }
+  .intro { margin: 0 0 1.5rem; color: var(--muted); max-width: 68ch; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td {
+    text-align: left;
+    vertical-align: top;
+    padding: .7rem .9rem;
+    border: 1px solid var(--line);
+  }
+  thead th { background: var(--head-bg); }
+  tbody th { font-weight: 600; width: 38%; }
+  footer { margin-top: 1.25rem; font-size: .9rem; color: var(--muted); }
+  @media print {
+    body { background: #fff; padding: 0; }
+    main { border: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Materialval – SS 1914 (11SMnPb30+C)</h1>
+  <p class="intro">Blylegerat friskärande automatstål, standardiserat enligt SS-EN 10277-3. Ej ett seghärdningsstål – hållfasthet och hårdhet uppnås via kalldragning, ej genom härdning och anlöpning.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th scope="col">Egenskap</th><th scope="col">Värde (11SMnPb30+C, SS 1914)</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Materialgrupp</th><td>4 (automatstål, fri-skärande, blylegerat)</td></tr>
+        <tr><th scope="row">Kemisk sammansättning (ca)</th><td>C &lt; 0,14 %, Si &lt; 0,05 %, Mn 0,90–1,30 %, P max 0,11 %, S 0,270–0,330 %, Pb 0,20–0,35 %</td></tr>
+        <tr><th scope="row">Leveranstillstånd</th><td>Kalldraget (+C)</td></tr>
+        <tr><th scope="row">Sträckgräns Re min (kalldraget, beroende på dimension)</th><td>245–440 MPa</td></tr>
+        <tr><th scope="row">Brottgräns Rm (kalldraget)</th><td>360–810 MPa</td></tr>
+        <tr><th scope="row">Brottförlängning A5 min</th><td>6–9 %</td></tr>
+        <tr><th scope="row">Hårdhet (kalldraget)</th><td>ca 140–220 HB</td></tr>
+        <tr><th scope="row">Härdning (vid behov)</th><td>Lämpar sig för induktions- eller flamhärdning; ythårdhet ca 52–60 HRC. Ej lämpligt för svetsning utan förvärmning.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>Källa: Verkstadshandboken.</footer>
+</main>
+</body>
+</html>
