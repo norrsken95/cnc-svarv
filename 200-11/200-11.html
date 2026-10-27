@@ -187,7 +187,34 @@
     .crumb a.crumb-item { color: var(--accent); text-decoration: none; font-weight: 600; }
     .crumb a.crumb-item:hover { text-decoration: underline; }
     .crumb .crumb-current { color: var(--text); font-weight: 700; }
-    @media print { .crumb { display: none; } }</style>
+    @media print { .crumb { display: none; } }
+    /* Fusion 360 preloader */
+    .viewers .fusion-wrap { flex: 1 1 45%; min-width: 280px; height: 75vh; position: relative;
+      border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+    .viewers .fusion-wrap iframe { width: 100%; height: 100%; min-width: 0; flex: none; display: block; }
+    .fusion-loader { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1.1rem; background: var(--surface);
+      transition: opacity .4s ease, visibility .4s ease; }
+    .fusion-loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+    .fusion-loader svg { width: 72px; height: 72px; overflow: visible; }
+    .fusion-loader .cube-outline { fill: none; stroke: #f58220; stroke-width: 2.5; stroke-linejoin: round;
+      stroke-dasharray: 60 140; animation: fl-trace 1.8s linear infinite; }
+    .fusion-loader .cube-inner { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-linecap: round;
+      stroke-linejoin: round; opacity: .55; animation: fl-pulse 1.8s ease-in-out infinite; }
+    .fusion-loader .fl-text { font-size: .95rem; font-weight: 600; color: var(--text); text-align: center; }
+    .fusion-loader .fl-sub { font-size: .8rem; color: var(--muted); min-height: 1.2em; margin-top: -.8rem; text-align: center; }
+    .fusion-loader .fl-bar { width: min(220px, 60%); height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+    .fusion-loader .fl-bar span { display: block; height: 100%; width: 40%; border-radius: 2px; background: #f58220;
+      animation: fl-slide 1.3s ease-in-out infinite; }
+    @keyframes fl-trace { to { stroke-dashoffset: -200; } }
+    @keyframes fl-pulse { 50% { opacity: .15; } }
+    @keyframes fl-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+    @media (prefers-reduced-motion: reduce) {
+      .fusion-loader .cube-outline { animation: none; stroke-dasharray: none; }
+      .fusion-loader .cube-inner, .fusion-loader .fl-bar span { animation: none; }
+      .fusion-loader .fl-bar span { width: 100%; opacity: .6; }
+    }
+    @media print { .fusion-loader { display: none; } }</style>
 </head>
 <body>
       <!-- CRUMB -->
@@ -221,7 +248,51 @@
   <h1>200-11</h1>
   <div class="viewers">
     <iframe src="200-11.pdf" title="200-11 Drawing"></iframe>
-    <iframe src="https://yaelev74.autodesk360.com/shares/public/SH90d2dQT28d5b60281194f20074fad45587?mode=embed" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+        <div class="fusion-wrap" id="fusionWrap">
+      <div class="fusion-loader" id="fusionLoader" role="status" aria-live="polite">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <path class="cube-inner" d="M8 19 32 32 56 19M32 32V58"/>
+          <path class="cube-outline" d="M32 6 56 19 56 45 32 58 8 45 8 19Z"/>
+        </svg>
+        <div class="fl-text">Laddar Fusion 360-modell&hellip;</div>
+        <div class="fl-sub" id="fusionSub"></div>
+        <div class="fl-bar"><span></span></div>
+      </div>
+      <iframe id="fusionFrame" title="200-11 Fusion 360" src="https://yaelev74.autodesk360.com/shares/public/SH90d2dQT28d5b60281194f20074fad45587?mode=embed" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+    </div>
+    <script>
+      (function () {
+        var frame = document.getElementById('fusionFrame');
+        var loader = document.getElementById('fusionLoader');
+        var sub = document.getElementById('fusionSub');
+        if (!frame || !loader) return;
+        var hidden = false;
+        var slow, giveUp, afterLoad;
+        function hide() {
+          if (hidden) return;
+          hidden = true;
+          clearTimeout(slow); clearTimeout(giveUp); clearTimeout(afterLoad);
+          loader.classList.add('done');
+          loader.setAttribute('aria-busy', 'false');
+        }
+        loader.setAttribute('aria-busy', 'true');
+        frame.addEventListener('load', function () {
+          if (sub) sub.textContent = 'Laddar 3D-del\u2026';
+          clearTimeout(afterLoad);
+          afterLoad = setTimeout(hide, 8000);
+        });
+        window.addEventListener('message', function (e) {
+          var o = String(e.origin || '');
+          if (o.indexOf('autodesk') === -1 && o.indexOf('fusion') === -1) return;
+          clearTimeout(afterLoad);
+          afterLoad = setTimeout(hide, 1200);
+        });
+        slow = setTimeout(function () {
+          if (sub) sub.textContent = 'Tar l\u00e4ngre tid \u00e4n vanligt\u2026';
+        }, 12000);
+        giveUp = setTimeout(hide, 45000);
+      })();
+    </script>
   </div>
   <div class="layout">
     <main>
@@ -497,7 +568,7 @@
 <span class="ln">(TOOL - 3 OFFSET - 3)</span>
 <span class="ln">(THREAD M16X1.5  INSERT - 266RG-16MM02A150M 1125)</span>
 <span class="ln">G00 T0303</span>
-<span class="ln">G97 S201 M4</span>
+<span class="ln">G97 S201 M3</span>
 <span class="ln">G54</span>
 <span class="ln">G00 Z10.328</span>
 <span class="ln">X19.933</span>
