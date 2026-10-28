@@ -197,7 +197,16 @@
       .fusion-loader .cube-inner, .fusion-loader .fl-bar span { animation: none; }
       .fusion-loader .fl-bar span { width: 100%; opacity: .6; }
     }
-    @media print { .fusion-loader { display: none; } }</style>
+    @media print { .fusion-loader { display: none; } }
+    .btn-dl {
+      display: inline-block; margin-left: .6rem; font-size: .78rem; font-weight: 600;
+      padding: .22rem .75rem; border-radius: 4px; text-decoration: none; vertical-align: middle;
+      background: #0d2b5e; color: #fff; border: none;
+      transition: background .18s ease, transform .12s ease;
+    }
+    .btn-dl:hover { background: #1a4a9e; transform: translateY(-1px); }
+    .btn-dl:active { transform: translateY(0); }
+    @media print { .btn-dl { display: none; } }</style>
 </head>
 <body>
       <!-- CRUMB -->
@@ -488,7 +497,7 @@
 </div>
   <div class="code-row">
     <div class="code-block">
-      <h2>NC-program – O00006.NC</h2>
+      <h2>NC-program – O00006.NC <a href="O00006.NC" download class="btn-dl">Ladda ner</a></h2>
       <div class="cnc" role="region" aria-label="NC-program O0000">
         <div class="cnc-head"><span>MEM</span><span>O0000</span><span>N00000001</span></div>
         <pre class="cnc-body"><span class="ln">%</span>
