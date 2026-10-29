@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Svarvprojekt – CNC avgångsarbete</title>
+<style>
+@font-face{
+  font-family:"Transducer";
+  src:url("fonts/Transducer-Medium.woff2") format("woff2"),
+      url("fonts/Transducer-Medium.woff") format("woff");
+  font-weight:400 700;   /* filen är en enda vikt (Medium) – intervallet hindrar webbläsaren från att fuska fram fetstil */
+  font-style:normal; font-display:swap;
+}
+:root{
+  color-scheme:light;
+  --black:#000; --ink:#101214; --muted:#5d646b; --line:#dcdfe2; --paper:#f2f3f4; --white:#fff;
+  --on-dark:#fff; --on-dark-muted:#a9afb5; --line-dark:#2a2d30; --accent:#1b4f8f;
+  --font:"Transducer","Helvetica Neue",Arial,sans-serif;
+  --pad:clamp(20px,4vw,56px);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:calc(72px + env(safe-area-inset-top,0px));scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--white);color:var(--ink);font:400 17px/1.55 var(--font);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid #6aa5ee;outline-offset:3px}
+.wrap{max-width:1440px;margin:0 auto;padding:0 var(--pad)}
+.sr{position:absolute;left:-9999px}
+
+/* ===== Header: svart, minimal ===== */
+.top{position:sticky;top:0;z-index:50;background:var(--black);color:var(--on-dark)}
+.top .wrap{display:flex;align-items:center;gap:32px;min-height:72px}
+.brand{font:700 20px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;text-decoration:none;white-space:nowrap}
+.nav{display:flex;gap:28px;margin-left:12px}
+.nav a{font-size:15px;font-weight:500;text-decoration:none;color:var(--on-dark-muted);padding:6px 0;border-bottom:2px solid transparent}
+.nav a:hover{color:#fff;border-color:#fff}
+.search{margin-left:auto;flex:0 1 300px}
+.search input{width:100%;height:44px;padding:0 4px;border:0;border-bottom:1px solid #555;border-radius:0;background:transparent;color:#fff;font:inherit;font-size:15px}
+.search input::placeholder{color:var(--on-dark-muted)}
+.search input:focus{outline:none;border-bottom-color:#fff}
+.cart{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;text-decoration:none;color:var(--on-dark-muted)}
+.cart b{background:#fff;color:#000;border-radius:999px;min-width:26px;height:26px;display:grid;place-items:center;font-size:13px;padding:0 8px}
+
+
+/* ===== Språkväljare ===== */
+.lang{display:flex;gap:10px;align-items:center;margin-left:auto}   /* flaggorna längst till höger, med luft mot loggan */
+.lang-btn{padding:2px;border:2px solid transparent;border-radius:50%;background:none;cursor:pointer;line-height:0;opacity:.5;transition:opacity .2s,border-color .2s}
+.lang-btn svg{width:28px;height:28px;display:block;border-radius:50%}
+.lang-btn:hover{opacity:1}
+.lang-btn[aria-pressed="true"]{opacity:1;border-color:#fff}
+
+/* ===== Hero: helbredd, svart, stor rubrik ===== */
+.hero-band{background:var(--black);color:var(--on-dark);overflow:hidden}
+/* Intro + loggor ska rymmas på en skärm (desktop): hero tar det som blir över under headern */
+.intro{display:flex;flex-direction:column;min-height:calc(100vh - 72px);min-height:calc(100svh - 72px)}
+.hero-band{flex:1;display:flex}
+.hero-band > .hero{flex:1}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:48px;min-height:0;padding-block:clamp(16px,3vh,44px)}
+.eyebrow{display:inline-block;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--on-dark-muted);margin-bottom:24px}
+.hero h1{font:600 clamp(36px,min(4.8vw,8.4vh),84px)/1 var(--font);letter-spacing:-.035em;margin:0 0 clamp(16px,3vh,28px)}
+.hero p{margin:0 0 clamp(18px,3.4vh,36px);color:var(--on-dark-muted);max-width:52ch;font-size:clamp(16px,min(1.4vw,2.3vh),20px)}
+.btn{display:inline-flex;align-items:center;gap:14px;height:56px;padding:0 28px;border-radius:999px;background:#64B1BB;color:#fff;font-weight:600;font-size:16px;text-decoration:none;transition:gap .2s,background .2s}
+.btn::after{content:"→";font-size:20px;line-height:1}
+.btn:hover{gap:22px;background:#64b1bbc4}
+.hero-art{position:relative;align-self:stretch;justify-self:center;width:100%;min-height:260px}
+.hero-art::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#20242a 0%,rgba(32,36,42,0) 62%)}
+/* Svävande delar (hälften så stora som i helskärmsversionen) */
+.part{position:absolute;left:var(--x);top:var(--y);width:var(--w);pointer-events:none;will-change:transform;transform:translate3d(0,0,0)}
+.part img{display:block;width:100%;height:auto;filter:drop-shadow(0 16px 20px rgba(0,0,0,.55));user-select:none;-webkit-user-drag:none}
+.p-handtag  {--x:3%;  --y:4%;  --w:clamp(70px,min(10.5vw,20vh),165px)}
+.p-trappaxel{--x:52%; --y:2%;  --w:clamp(80px,min(12vw,22vh),190px)}
+.p-kulled   {--x:2%;  --y:50%; --w:clamp(85px,min(13vw,24vh),200px)}
+.p-gangad   {--x:58%; --y:57%; --w:clamp(70px,min(10vw,19vh),155px)}
+
+/* ===== Pelare: tre kolumner med tunn linje ===== */
+.pillars{padding-block:clamp(64px,9vw,128px)}
+.statement{font:500 clamp(28px,3.6vw,52px)/1.12 var(--font);letter-spacing:-.025em;max-width:24ch;margin:0 0 clamp(48px,6vw,88px)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,48px)}
+.facts div{border-top:2px solid var(--ink);padding-top:20px;font-size:17px;color:var(--muted)}
+.facts strong{display:block;font:600 clamp(40px,5vw,72px)/1 var(--font);letter-spacing:-.03em;color:var(--ink);margin-bottom:10px}
+
+/* ===== Logotyper: gråskala på vitt ===== */
+.logos{padding:clamp(24px,4vh,48px) 0;border-block:1px solid var(--line);text-align:left}
+.logos .wrap{margin-bottom:clamp(14px,2.5vh,24px)}
+.logos h2{font:600 14px/1.2 var(--font);letter-spacing:.16em;text-transform:uppercase;margin:0 0 6px;color:var(--ink)}
+.logos .wrap p{margin:0;color:var(--muted);font-size:16px}
+.logos-viewport{overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.logos-track{display:flex;gap:20px;width:max-content;animation:logos-scroll 32s linear infinite}
+.logos-viewport:hover .logos-track,.logos-viewport:focus-within .logos-track{animation-play-state:paused}
+.logo{flex:0 0 auto;width:200px;height:clamp(56px,9vh,84px);padding:14px 24px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.logo img{width:100%;height:100%;object-fit:contain;object-position:center;display:block;filter:grayscale(1);opacity:.65;transition:filter .2s,opacity .2s}
+.logo:hover img,.logo:focus-visible img{filter:none;opacity:1}
+@keyframes logos-scroll{to{transform:translateX(calc(-50% - 10px))}}
+@media (prefers-reduced-motion:reduce){
+  .logos-viewport{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
+  .logos-track{animation:none}
+  .logos-track [aria-hidden="true"]{display:none}
+}
+
+/* ===== Övningar: rubrikrad, flikar, kortrutnät ===== */
+.projects{background:var(--paper);}
+.bar{display:flex;align-items:end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:12px}
+.bar h2{font:600 clamp(36px,4.5vw,64px)/1 var(--font);letter-spacing:-.03em;margin-bottom:20px}
+.chips{display:flex;gap:28px;flex-wrap:wrap}
+.chip{padding:8px 0;border:0;border-bottom:2px solid transparent;background:none;color:var(--muted);font:500 16px var(--font);cursor:pointer}
+.chip:hover{color:var(--ink)}
+.chip[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.count{color:var(--muted);font-size:14px;margin:0 0 32px}
+.grid{list-style:none;margin:0;padding:0; padding-bottom:30px; display: grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:24px}
+.card{background:var(--white);display:flex;flex-direction:column;overflow:hidden;position:relative;transition:box-shadow .25s,transform .25s}
+.card:hover{box-shadow:0 18px 40px -18px rgba(0,0,0,.35);transform:translateY(-3px)}
+.card .pic{aspect-ratio:4/3;background:#eceeef;display:grid;place-items:center}
+.card .pic img{width:68%;height:auto;display:block}
+.card .info{padding:24px 24px 26px;display:flex;flex-direction:column;gap:10px;flex:1}
+.nr{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.nr{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;letter-spacing:.06em}   /* O00001 = NC-programnummer: i Transducer ser bokstaven O ut som siffran 0 */
+.card h3{font:600 26px/1.12 var(--font);letter-spacing:-.02em;margin:0}
+.card h3 a{text-decoration:none}
+.card h3 a::after{content:"";position:absolute;inset:0}
+.card p{margin:0;color:var(--muted);font-size:15.5px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:8px}
+.tags span{font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:3px 11px;color:var(--muted)}
+.go{margin-top:16px;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:15px}
+.go span{font-size:22px;transition:transform .2s}
+.card:hover .go span{transform:translateX(6px)}
+.card[hidden],.empty[hidden]{display:none}
+.empty{grid-column:1/-1;padding:48px;text-align:center;color:var(--muted);background:var(--white)}
+@media (prefers-reduced-motion:reduce){.card,.card .go span,.btn{transition:none}.card:hover{transform:none}html{scroll-behavior:auto}}
+
+/* ===== Footer: svart, tre kolumner + juridisk rad ===== */
+footer{background:var(--black);color:var(--on-dark);padding:clamp(56px,7vw,96px) 0 32px;}
+.foot-cols{display:grid;grid-template-columns:1.3fr repeat(3,1fr);gap:40px;padding-bottom:56px}
+.foot-brand{font:700 20px/1 var(--font);letter-spacing:.14em;text-transform:uppercase}
+.foot-brand small{display:block;margin-top:14px;font:400 15px/1.5 var(--font);letter-spacing:0;text-transform:none;color:var(--on-dark-muted);max-width:30ch}
+footer h4{font:600 14px/1.2 var(--font);letter-spacing:.14em;text-transform:uppercase;margin:0 0 20px}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+footer ul a{color:var(--on-dark-muted);text-decoration:none;font-size:15px}
+footer ul a:hover{color:#fff;text-decoration:underline}
+.legal{border-top:1px solid var(--line-dark);padding-top:24px;color:var(--on-dark-muted);font-size:14px}
+
+
+/* ===== Punktlista i hero ===== */
+.hero .feat{list-style:none;margin:0 0 clamp(20px,3.6vh,36px);padding:0;display:grid;gap:clamp(6px,1.2vh,12px);max-width:60ch}
+.hero .feat li{position:relative;padding-left:26px;color:#e6e9ec;font-size:clamp(15px,min(1.25vw,2.2vh),18px);line-height:1.4}
+.hero .feat li::before{content:"";position:absolute;left:0;top:.5em;width:10px;height:10px;border-radius:50%;background:#64B1BB}
+.hero .feat small{display:block;margin-top:2px;color:var(--on-dark-muted);font-size:.86em;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+/* Låga skärmar: tajtare så att intro + loggor ryms på en skärm */
+.hero .btn{height:clamp(44px,6.4vh,56px)}
+@media (min-width:961px) and (max-height:820px){
+  .hero h1{margin-bottom:10px}
+  .hero p{margin-bottom:12px}
+  .hero .feat{gap:3px;margin-bottom:16px}
+  .hero .feat li{font-size:14.5px;line-height:1.3}
+  .hero .feat li::before{top:.45em;width:8px;height:8px}
+  .hero .feat small{margin-top:0}
+}
+
+/* ===== Responsivt ===== */
+@media (max-width:960px){
+  .intro{min-height:0}
+  .hero{grid-template-columns:1fr;min-height:0;padding-block:48px 64px}
+  .hero-art{order:-1;aspect-ratio:1/1;max-height:340px;align-self:auto;min-height:0}
+  .p-handtag{--w:22vw}.p-trappaxel{--w:25vw}.p-kulled{--w:27vw}.p-gangad{--w:21vw}
+  .foot-cols{grid-template-columns:1fr 1fr}
+  .nav{display:none}
+}
+@media (max-width:640px){
+  .top .wrap{flex-wrap:wrap;gap:8px 12px;padding-block:10px}
+  .brand{font-size:17px;letter-spacing:.1em}
+  .lang{gap:6px}
+  .lang-btn svg{width:26px;height:26px}
+}
+@media (max-width:480px){
+  .cart > span{display:none}   /* bara siffran på små skärmar, så flaggorna får plats på samma rad */
+  .search{order:3;flex-basis:100%}
+  .cart{margin-left:auto}
+  .search{margin-left:0}
+  .facts{grid-template-columns:1fr}
+  .logo{width:150px;height:70px}
+  .logos-track{animation-duration:24s}
+  .foot-cols{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#">Svarvprojekt</a><div class="lang" role="group" aria-label="Språk / Language">
+      <button type="button" class="lang-btn" data-lang="sv" aria-pressed="true" aria-label="Svenska" title="Svenska">
+        <svg viewBox="0 0 16 10" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><rect width="16" height="10" fill="#006AA7"/><rect x="5" width="2" height="10" fill="#FECC00"/><rect y="4" width="16" height="2" fill="#FECC00"/></svg>
+      </button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false" aria-label="English" title="English">
+        <svg viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><clipPath id="gb-s"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="gb-t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><g clip-path="url(#gb-s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#gb-t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="intro">
+  <div class="hero-band">
+    <section class="wrap hero" aria-labelledby="h1">
+      <div class="hero-copy">
+        <h1 id="h1" data-i18n="hero.h1">CNC portfolio</h1>
+        <p data-i18n="hero.p">Elva övningar i svarv</p>
+        <ul class="feat">
+          <li data-i18n="list.1">Alla ritningar och modeller skapat i Fusion 360</li>
+          <li data-i18n="list.2">NC-programmering i Fusion 360 och Mastercam</li>
+          <li data-i18n="list.3">Skärdata från Sandvik CoroPlus® Tool Guide</li>
+          <li data-i18n="list.4">Verifiering av toolpath i CIMCO och Vericut</li>
+          <li data-i18n="list.5">Analys av gouge och excess i Vericut</li>
+          <li><span data-i18n="list.6">Användning av grov- och fincykler, borrcykler och gängcykler</span><small>G70–G73, G76, G83</small></li>
+          <li data-i18n="list.7">Nosradiekompensering G42 och G41</li>
+        </ul>
+        <br>
+        <a class="btn" href="#projekt" data-i18n="hero.btn">Öppna avgångsprojektet</a>
+      </div>
+      <div class="hero-art" id="heroArt" aria-hidden="true">
+        <div class="part p-handtag"   data-depth="1.0"><img src="bilder/hero-handtag.png"   alt="" width="271" height="218"></div>
+        <div class="part p-trappaxel" data-depth="0.7"><img src="bilder/hero-trappaxel.png" alt="" width="307" height="207"></div>
+        <div class="part p-kulled"    data-depth="1.3"><img src="bilder/hero-kulled.png"    alt="" width="326" height="266"></div>
+        <div class="part p-gangad"    data-depth="0.9"><img src="bilder/hero-gangad.png"    alt="" width="249" height="206"></div>
+      </div>
+    </section>
+  </div>
+
+    <section class="logos" id="verktyg" aria-labelledby="logos-h">
+  <div class="wrap"><h2 id="logos-h" data-i18n="logos.h" style="text-align: center;">Verktyg och programvara jag arbetar med</h2>
+  <p data-i18n="logos.p" style="text-align: center;">CAM, simulering och skärverktyg från utbildningen</p></div>
+
+  <div class="logos-viewport">
+    <div class="logos-track">
+      <!-- Original -->
+      <a class="logo" href="https://www.cimco.com" target="_blank" rel="noopener"><img src="bilder/cimco.png" alt="CIMCO" width="386" height="101"></a>
+      <a class="logo" href="https://www.autodesk.com/products/fusion-360/overview" target="_blank" rel="noopener"><img src="bilder/fusion360.png" alt="Fusion 360" width="1210" height="336"></a>
+      <a class="logo" href="https://www.mastercam.com" target="_blank" rel="noopener"><img src="bilder/mastercam.jpg" alt="Mastercam" width="1841" height="235"></a>
+           <a class="logo" href="https://www.haas.com" target="_blank" rel="noopener"><img src="bilder/haas.png" alt="Haas" width="512" height="512"></a>
+      <a class="logo" href="https://www.sandvik.coromant.com" target="_blank" rel="noopener"><img src="bilder/sandvik_coromant.png" alt="Sandvik Coromant" width="673" height="161"></a>
+      <a class="logo" href="https://www.vericut.com" target="_blank" rel="noopener"><img src="bilder/vericut.png" alt="Vericut" width="748" height="176"></a>
+
+
+      <!-- Kopia för sömlös loop (dold för skärmläsare). Lägger du till en logotyp ovan: lägg till den här också. -->
+      <a class="logo" href="https://www.cimco.com" target="_blank" rel="noopener" aria-hidden="true" tabindex="-1"><img src="bilder/cimco.png" alt=""></a>
+      <a class="logo" href="https://www.autodesk.com/products/fusion-360/overview" target="_blank" rel="noopener" aria-hidden="true" tabindex="-1"><img src="bilder/fusion360.png" alt=""></a>
+      <a class="logo" href="https://www.mastercam.com" target="_blank" rel="noopener" aria-hidden="true" tabindex="-1"><img src="bilder/mastercam.jpg" alt=""></a>
+      <a class="logo" href="https://www.haas.com" target="_blank" rel="noopener" aria-hidden="true" tabindex="-1"><img src="bilder/haas.png" alt=""></a>
+      <a class="logo" href="https://www.sandvik.coromant.com" target="_blank" rel="noopener" aria-hidden="true" tabindex="-1"><img src="bilder/sandvik_coromant.png" alt=""></a>
+      <a class="logo" href="https://www.vericut.com" target="_blank" rel="noopener" aria-hidden="true" tabindex="-1"><img src="bilder/vericut.png" alt=""></a>
+    </div>
+  </div>
+</section>
+  </div><!-- /intro -->
+
+  <section id="projekt" class="projects" aria-labelledby="h2">
+    <div class="wrap">
+      <div class="bar">
+        <h2 id="h2" data-i18n="proj.h">Svarvövningar</h2>
+      </div>
+      <ul class="grid" id="grid">
+      <li class="card" data-kat="axlar">
+        <div class="pic"><img src="bilder/sv-01.png" alt="Axel med skuldra, 3D-modell" data-i18n-attr="alt:card.1.alt" loading="lazy"></div>
+        <div class="info">
+          <span class="nr">O00001</span>
+          <h3><a href="./200-01/200-01.html" data-i18n="card.1.title">Axel med skuldra</a></h3>
+          <p data-i18n="card.1.text">Kraftig skuldra och tunnare tapp med fasade kanter.</p>
+          <div class="tags"><span data-i18n="tag.lang">Längdsvarvning</span><span data-i18n="tag.plan">Planing</span><span data-i18n="tag.fas">Fas</span></div>
+          <div class="go"><span data-i18n="card.go">Visa projekt</span> <span aria-hidden="true">›</span></div>
+        </div>
+      </li>
+      <li class="card" data-kat="axlar">
+        <div class="pic"><img src="bilder/sv-02.png" alt="Axel med flera steg, 3D-modell" data-i18n-attr="alt:card.2.alt" loading="lazy"></div>
+        <div class="info">
+          <span class="nr">O00002</span>
+          <h3><a href="./200-02/200-02.html" data-i18n="card.2.title">Axel med flera steg</a></h3>
+          <p data-i18n="card.2.text">Skuldra med två smala steg och fasad tapp.</p>
+          <div class="tags"><span data-i18n="tag.lang">Längdsvarvning</span><span data-i18n="tag.fas">Fas</span><span data-i18n="tag.plan">Planing</span></div>
+          <div class="go"><span data-i18n="card.go">Visa projekt</span> <span aria-hidden="true">›</span></div>
+        </div>
+      </li>
+      <li class="card" data-kat="axlar">
+        <div class="pic"><img src="bilder/sv-03.png" alt="Axel med flera steg, 3D-modell" data-i18n-attr="alt:card.3.alt" loading="lazy"></div>
+        <div class="info">
+          <span class="nr">O00003</span>
+          <h3><a href="./200-03/200-03.html" data-i18n="card.3.title">Konisk skaft</a></h3>
+          <p data-i18n="card.3.text">Planing, längd- och konisk svarvning, urstick och radier.</p>
+          <div class="tags"><span data-i18n="tag.kon">Konisk svarvning</span><span data-i18n="tag.rad">Radie</span><span data-i18n="tag.lang">Längdsvarvning</span></div>
+          <div class="go"><span data-i18n="card.go">Visa projekt</span> <span aria-hidden="true">›</span></div>
+        </div>
+      </li>
+      <li class="card" data-kat="special">
+        <div class="pic"><img src="bilder/sv-04.png" alt="Spindel med konisk midja, 3D-modell" data-i18n-attr="alt:card.4.alt" loading="lazy"></div>
+        <div class="info">
+          <span class="nr">O00004</span>
+          <h3><a href="./200-04/200-04.html" data-i18n="card.4.title">Spindel med konisk midja</a></h3>
+          <p data-i18n="card.4.text">Rundad ände, konisk midja och platt skiva. Kräver jämna radier.</p>
+          <div class="tags"><span data-i18n="tag.kon">Konisk svarvning</span><span data-i18n="tag.rad">Radie</span><span data-i18n="tag.lang">Längdsvarvning</span></div>
+          <div class="go"><span data-i18n="card.go">Visa projekt</span> <span aria-hidden="true">›</span></div>
+        </div>
+      </li>
+      <li class="card" data-kat="hylsor">
+        <div class="pic"><img src="bilder/sv-05.png" alt="Rak hylsa, 3D-modell" data-i18n-attr="alt:card.5.alt" loading="lazy"></div>
+        <div class="info">
+          <span class="nr">O00005</span>
+          <h3><a href="./200-05/200-05.html" data-i18n="card.5.title">Rak hylsa</a></h3>
+          <p data-i18n="card.5.text">Genomgående hylsa med jämn vägg. Övar mått och ytfinhet.</p>
+          <div class="tags"><span data-i18n="tag.bor">Borrning</span><span data-i18n="tag.inv">Invändig svarvning</span></div>
+          <div class="go"><span data-i18n="card.go">Visa projekt</span> <span aria-hidden="true">›</span></div>
+        </div>
+      </li>
+      <li class="card" data-kat="hylsor">
+      <div class="pic"><img src="bilder/sv-06.png" alt="Rak hylsa, 3D-modell" data-i18n-attr="alt:card.6.alt" loading="lazy"></div>
+      <div class="info">
+        <span class="nr">O00006</span>
+        <h3><a href="./200-06/200-06.html" data-i18n="card.6.title">Hylsa med invändigt steg</a></h3>
+        <p data-i18n="card.6.text">Hylsa med ett steg på insidan. Övar borrning och invändig svarvning.</p>
+        <div class="tags"><span data-i18n="tag.bor">Borrning</span><span data-i18n="tag.inv">Invändig svarvning</span></div>
+        <div class="go"><span data-i18n="card.go">Visa projekt</span> <span aria-hidden="true">›</span></div>
+      </div>
+      </li>
+      <li class="card" data-kat="axlar">
+        <div class="pic"><img src="bilder/sv-07.png" alt="Stegaxel, 3D-modell" data-i18n-attr="alt:card.7.alt" loading="lazy"></div>
+        <div class="info">
+          <span class="nr">O00007</span>
+          <h3><a href="./200-07/200-07.html" data-i18n="card.7.title">Stegaxel</a></h3>
+          <p data-i18n="card.7.text">Axel med två diametersteg. Grundövning i längdsvarvning och planing.</p>
+          <div class="tags"><span data-i18n="tag.lang">Längdsvarvning</span><span data-i18n="tag.plan">Planing</span></div>
+          <div class="go"><span data-i18n="card.go">Visa projekt</span> <span aria-hidden="true">›</span></div>
+        </div>
+      </li>
+      <li class="card" data-kat="axlar">
+        <div class="pic"><img src="bilder/sv-08.png" alt="Trappaxel, 3D-modell" data-i18n-attr="alt:card.8.alt" loading="lazy"></div>
+        <div class="info">
+          <span class="nr">O00008</span>
+          <h3><a href="./200-09/200-08.html" data-i18n="card.8.title">Trappaxel</a></h3>
+          <p data-i18n="card.8.text">Fyra successiva steg som minskar i diameter.</p>
+          <div class="tags"><span data-i18n="tag.steg">Stegsvarvning</span><span data-i18n="tag.lang">Längdsvarvning</span><span data-i18n="tag.plan">Planing</span></div>
+          <div class="go"><span data-i18n="card.go">Visa projekt</span> <span aria-hidden="true">›</span></div>
+        </div>
+      </li>
+      <li class="card" data-kat="hylsor">
+        <div class="pic"><img src="bilder/sv-09.png" alt="Hylsa med invändig urtagning, 3D-modell" data-i18n-attr="alt:card.9.alt" loading="lazy"></div>
+        <div class="info">
+          <span class="nr">O00009</span>
+          <h3><a href="./200-09/200-09.html" data-i18n="card.9.title">Hylsa med invändig urtagning</a></h3>
+          <p data-i18n="card.9.text">Hylsa med urtag på insidan. Övar invändigt urstick.</p>
+          <div class="tags"><span data-i18n="tag.bor">Borrning</span><span data-i18n="tag.inn">Innerurstick</span></div>
+          <div class="go"><span data-i18n="card.go">Visa projekt</span> <span aria-hidden="true">›</span></div>
+        </div>
+      </li>
+      <li class="card" data-kat="special">
+        <div class="pic"><img src="bilder/sv-10.png" alt="Kulled, 3D-modell" data-i18n-attr="alt:card.10.alt" loading="lazy"></div>
+        <div class="info">
+          <span class="nr">O00010</span>
+          <h3><a href="./200-10/200-10.html" data-i18n="card.10.title">Kulled</a></h3>
+          <p data-i18n="card.10.text">Kulhuvud på hals mot en kopp. Övar formsvarvning med radie.</p>
+          <div class="tags"><span data-i18n="tag.form">Formsvarvning</span><span data-i18n="tag.rad">Radie</span><span data-i18n="tag.ur">Urstick</span></div>
+          <div class="go"><span data-i18n="card.go">Visa projekt</span> <span aria-hidden="true">›</span></div>
+        </div>
+      </li>
+      <li class="card" data-kat="axlar">
+        <div class="pic"><img src="bilder/sv-11.png" alt="Gängad axel, 3D-modell" data-i18n-attr="alt:card.11.alt" loading="lazy"></div>
+        <div class="info">
+          <span class="nr">O00011</span>
+          <h3><a href="./200-11/200-11.html" data-i18n="card.11.title">Gängad axel</a></h3>
+          <p data-i18n="card.11.text">Axel med gängad tapp och urstick vid gängans slut.</p>
+          <div class="tags"><span data-i18n="tag.gang">Gängsvarvning</span><span data-i18n="tag.ur">Urstick</span><span data-i18n="tag.lang">Längdsvarvning</span></div>
+          <div class="go"><span data-i18n="card.go">Visa projekt</span> <span aria-hidden="true">›</span></div>
+        </div>
+      </li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="legal"><span>© <span id="year">2026</span></span> <span data-i18n="foot.legal">Svarvprojekt. Alla rättigheter förbehållna. Fusion 360, Mastercam, CIMCO, Vericut, Sandvik Coromant och Haas är varumärken som tillhör respektive ägare.</span></div>
+  </div>
+</footer>
+
+<script>
+/* Språk: svenska är standardtexten i HTML-koden, engelska ligger i EN nedan.
+   Nya texter: lägg data-i18n="nyckel" på elementet och nyckeln + engelsk text i EN. */
+(function(){
+  var EN={
+  "hero.h1": "CNC portfolio",
+  "hero.p": "Eleven turning exercises",
+  "hero.btn": "Open the final project",
+  "logos.h": "Tools and software I work with",
+  "logos.p": "CAM, simulation and cutting tools from the programme",
+  "proj.h": "Turning exercises",
+  "tag.lang": "Straight turning",
+  "tag.plan": "Facing",
+  "tag.fas": "Chamfer",
+  "tag.kon": "Taper turning",
+  "tag.rad": "Radius",
+  "tag.bor": "Drilling",
+  "tag.inv": "Boring",
+  "tag.avs": "Parting off",
+  "tag.steg": "Step turning",
+  "tag.inn": "Internal grooving",
+  "tag.ur": "Grooving",
+  "tag.form": "Form turning",
+  "tag.gang": "Thread turning",
+  "card.go": "View project",
+  "card.1.alt": "Shaft with shoulder, 3D model",
+  "card.1.title": "Shaft with shoulder",
+  "card.1.text": "Heavy shoulder and a thinner journal with chamfered edges.",
+  "card.2.alt": "Multi-step shaft, 3D model",
+  "card.2.title": "Multi-step shaft",
+  "card.2.text": "Shoulder with two narrow steps and a chamfered journal.",
+  "card.3.alt": "Tapered shaft, 3D model",
+  "card.3.title": "Tapered shaft",
+  "card.3.text": "Facing, straight and taper turning, grooving and radii.",
+  "card.4.alt": "Spindle with tapered waist, 3D model",
+  "card.4.title": "Spindle with tapered waist",
+  "card.4.text": "Rounded end, tapered waist and flat disc. Requires smooth radii.",
+  "card.5.alt": "Straight sleeve, 3D model",
+  "card.5.title": "Straight sleeve",
+  "card.5.text": "Through sleeve with an even wall. Practises dimensions and surface finish.",
+  "card.6.alt": "Sleeve with internal step, 3D model",
+  "card.6.title": "Sleeve with internal step",
+  "card.6.text": "Sleeve with a step on the inside. Practises drilling and internal turning.",
+  "card.7.alt": "Stepped shaft, 3D model",
+  "card.7.title": "Stepped shaft",
+  "card.7.text": "Shaft with two diameter steps. Basic exercise in straight turning and facing.",
+  "card.8.alt": "Staircase shaft, 3D model",
+  "card.8.title": "Staircase shaft",
+  "card.8.text": "Four successive steps decreasing in diameter.",
+  "card.9.alt": "Sleeve with internal groove, 3D model",
+  "card.9.title": "Sleeve with internal groove",
+  "card.9.text": "Sleeve with a groove on the inside. Practises internal grooving.",
+  "card.10.alt": "Ball joint, 3D model",
+  "card.10.title": "Ball joint",
+  "card.10.text": "Ball head on a neck against a cup. Practises form turning with radii.",
+  "card.11.alt": "Threaded shaft, 3D model",
+  "card.11.title": "Threaded shaft",
+  "card.11.text": "Shaft with a threaded journal and a relief groove at the end of the thread.",
+  "foot.legal": "Svarvprojekt. All rights reserved. Fusion 360, Mastercam, CIMCO, Vericut, Sandvik Coromant and Haas are trademarks of their respective owners.",
+  "title": "Svarvprojekt – CNC diploma project",
+  "count": "Showing {n} of {t} exercises",
+  "empty": "No exercise matches your search. Clear the search field or choose All.",
+  "list.1": "All drawings and models created in Fusion 360",
+  "list.2": "NC programming with a HAAS post processor in Mastercam",
+  "list.3": "Cutting data from Sandvik CoroPlus® Tool Guide",
+  "list.4": "Toolpath verification in CIMCO and Vericut",
+  "list.5": "Analysis of gouge and excess in Vericut",
+  "list.6": "Use of roughing and finishing cycles, drilling cycles and threading cycles",
+  "list.7": "Nose radius compensation G42 and G41"
+};
+  var els=[].slice.call(document.querySelectorAll('[data-i18n]'));
+  var attrEls=[].slice.call(document.querySelectorAll('[data-i18n-attr]'));
+  var SV={title:document.title,
+    count:'Visar {n} av {t} övningar',
+    empty:'Ingen övning matchar sökningen. Rensa sökfältet eller välj Alla.'};
+  els.forEach(function(el){SV[el.getAttribute('data-i18n')]=el.textContent});
+  attrEls.forEach(function(el){
+    el.getAttribute('data-i18n-attr').split(';').forEach(function(p){
+      var i=p.indexOf(':'),a=p.slice(0,i),k=p.slice(i+1); SV[k]=el.getAttribute(a);
+    });
+  });
+  var dict={sv:SV,en:EN};
+  var I18N=window.I18N={lang:'sv',
+    t:function(k,v){var s=(dict[this.lang][k]!=null?dict[this.lang][k]:SV[k])||'';
+      if(v)for(var x in v)s=s.replace('{'+x+'}',v[x]); return s;}};
+
+  function apply(lang){
+    I18N.lang=lang;
+    document.documentElement.lang=lang;
+    document.title=I18N.t('title');
+    els.forEach(function(el){el.textContent=I18N.t(el.getAttribute('data-i18n'))});
+    attrEls.forEach(function(el){
+      el.getAttribute('data-i18n-attr').split(';').forEach(function(p){
+        var i=p.indexOf(':'); el.setAttribute(p.slice(0,i),I18N.t(p.slice(i+1)));
+      });
+    });
+    [].forEach.call(document.querySelectorAll('.lang-btn'),function(b){
+      b.setAttribute('aria-pressed',b.dataset.lang===lang);
+    });
+    document.dispatchEvent(new CustomEvent('langchange',{detail:lang}));
+  }
+  function stored(){try{return localStorage.getItem('lang')}catch(e){return null}}
+  function save(l){try{localStorage.setItem('lang',l)}catch(e){}}
+
+  var m=/[?&]lang=(sv|en)/.exec(location.search);
+  var start=(m&&m[1])||stored()||'sv';
+  [].forEach.call(document.querySelectorAll('.lang-btn'),function(b){
+    b.addEventListener('click',function(){save(b.dataset.lang);apply(b.dataset.lang)});
+  });
+  I18N.apply=apply;
+  if(start!=='sv') apply(start);
+})();
+</script>
+<script>
+/* Innehållet ovan är statiskt HTML – redigera korten direkt.
+   Skriptet gör sök och filter om sökfält/filterknappar finns på sidan (annars gör det ingenting). */
+(function(){
+  var grid=document.getElementById('grid'); if(!grid) return;
+  var cards=[].slice.call(grid.querySelectorAll('.card'));
+  var q=document.getElementById('q'), countEl=document.getElementById('count'), totalEl=document.getElementById('total');
+  var chips=[].slice.call(document.querySelectorAll('.chip'));
+  var kat='alla';
+  if(totalEl) totalEl.textContent=cards.length;
+  var empty=document.createElement('li'); empty.className='empty'; empty.hidden=true; grid.appendChild(empty);
+  function render(){
+    var t=q?q.value.trim().toLowerCase():'', n=0;
+    cards.forEach(function(c){
+      var ok=(kat==='alla'||c.dataset.kat===kat)&&(!t||c.textContent.toLowerCase().indexOf(t)>-1);
+      c.hidden=!ok; if(ok)n++;
+    });
+    empty.hidden=n>0;
+    if(countEl) countEl.textContent=I18N.t('count',{n:n,t:cards.length});
+    empty.textContent=I18N.t('empty');
+  }
+  chips.forEach(function(b){b.addEventListener('click',function(){
+    kat=b.dataset.k;
+    chips.forEach(function(x){x.setAttribute('aria-pressed',x===b)});
+    render();
+  })});
+  if(q) q.addEventListener('input',render);
+  document.addEventListener('langchange',render);
+  render();
+})();
+(function(){var y=document.getElementById('year'); if(y) y.textContent=new Date().getFullYear();})();
+</script>
+<script>
+/* Svävande delar i hero – rörelsen räknas ut från rutans storlek */
+(function(){
+  var box=document.getElementById('heroArt');
+  if(!box||window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  var parts=[].slice.call(box.querySelectorAll('.part'));
+  var cfg=[
+    {fx:.34,fy:.27,fr:.22,px:0.0,py:1.3,pr:0.5,ax:.06,ay:.06,rot:5},
+    {fx:.26,fy:.31,fr:.18,px:2.1,py:0.4,pr:1.7,ax:.05,ay:.06,rot:4},
+    {fx:.29,fy:.23,fr:.25,px:4.0,py:2.6,pr:3.1,ax:.06,ay:.07,rot:6},
+    {fx:.37,fy:.30,fr:.20,px:1.2,py:5.0,pr:2.4,ax:.05,ay:.06,rot:5}
+  ];
+  var mx=0,my=0,tx=0,ty=0,visible=true,t0=performance.now();
+  window.addEventListener('pointermove',function(e){
+    tx=(e.clientX/innerWidth-.5)*2; ty=(e.clientY/innerHeight-.5)*2;
+  },{passive:true});
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(en){visible=en[0].isIntersecting}).observe(box);
+  }
+  function frame(now){
+    if(visible){
+      var t=(now-t0)/1000, w=box.clientWidth, h=box.clientHeight;
+      mx+=(tx-mx)*.05; my+=(ty-my)*.05;
+      for(var i=0;i<parts.length;i++){
+        var c=cfg[i], d=parseFloat(parts[i].dataset.depth)||1;
+        var x=Math.sin(t*c.fx+c.px)*c.ax*w - mx*12*d;
+        var y=Math.cos(t*c.fy+c.py)*c.ay*h - my*12*d;
+        var r=Math.sin(t*c.fr+c.pr)*c.rot;
+        parts[i].style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0) rotate('+r.toFixed(2)+'deg)';
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
