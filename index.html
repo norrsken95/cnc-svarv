@@ -203,7 +203,37 @@ footer ul a:hover{color:#fff;text-decoration:underline}
 <main>
   <div class="intro">
   <div class="hero-band">
-    <video class="hero-video" id="heroVideo" src="bilder/hero-video.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1"></video>
+    <video class="hero-video" id="heroVideo" muted loop playsinline preload="none" poster="bilder/hero-poster.jpg" aria-hidden="true" tabindex="-1"></video>
+    <script>
+      (function () {
+        var v = document.getElementById('heroVideo');
+        if (!v) return;
+
+        /* 1. Respect user preferences and network conditions */
+        var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+        var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        var slowNet = conn && (conn.saveData || conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g');
+        if (mq.matches || slowNet) return; /* keep poster, skip video entirely */
+
+        /* 2. Load + play only when the hero is in the viewport */
+        if ('IntersectionObserver' in window) {
+          var io = new IntersectionObserver(function (entries) {
+            if (entries[0].isIntersecting) {
+              v.src = 'bilder/hero-video.mp4';
+              v.load();
+              v.play().catch(function () {}); /* silence autoplay policy errors */
+              io.disconnect();
+            }
+          }, { threshold: 0.01 });
+          io.observe(v);
+        } else {
+          /* Fallback for old browsers: load immediately */
+          v.src = 'bilder/hero-video.mp4';
+          v.load();
+          v.play().catch(function () {});
+        }
+      })();
+    </script>
     <section class="wrap hero" aria-labelledby="h1">
       <div class="hero-copy">
         <h1 id="h1" data-i18n="hero.h1">CNC portfolio</h1>
